@@ -19,33 +19,13 @@ import time
 import requests
 
 from shllm.config import CORPUS_DIR, ensure_data_dirs
+from shllm.data import WORKS as _WORKS
 
 API = "https://ko.wikisource.org/w/api.php"
 UA = "sh-llm-study/0.1 (learning project; chungmu.xyz@gmail.com)"
 
-# (검색어, 저장 파일명). 위키문헌 페이지 제목은 바뀔 수 있어 검색 API 로 찾는다.
-WORKS: list[tuple[str, str]] = [
-    ("봄봄 김유정", "kim-yujeong-bombom"),
-    ("동백꽃 김유정", "kim-yujeong-dongbaekkkot"),
-    ("소낙비 김유정", "kim-yujeong-sonakbi"),
-    ("만무방 김유정", "kim-yujeong-manmubang"),
-    ("운수 좋은 날 현진건", "hyun-jingeon-unsu-joeun-nal"),
-    ("빈처 현진건", "hyun-jingeon-bincheo"),
-    ("B사감과 러브레터 현진건", "hyun-jingeon-b-sagam"),
-    ("술 권하는 사회 현진건", "hyun-jingeon-sul-gwonhaneun-sahoe"),
-    ("날개 이상", "yi-sang-nalgae"),
-    ("메밀꽃 필 무렵 이효석", "lee-hyoseok-memilkkot"),
-    ("벙어리 삼룡이 나도향", "na-dohyang-samryongi"),
-    ("물레방아 나도향", "na-dohyang-mullebanga"),
-    ("감자 김동인", "kim-dongin-gamja"),
-    ("배따라기 김동인", "kim-dongin-baettaragi"),
-    ("광염 소나타 김동인", "kim-dongin-gwangyeom-sonata"),
-    ("레디메이드 인생 채만식", "chae-manshik-readymade"),
-    ("치숙 채만식", "chae-manshik-chisuk"),
-    ("탁류 채만식", "chae-manshik-takryu"),
-    ("태평천하 채만식", "chae-manshik-taepyeongcheonha"),
-    ("무정 이광수", "lee-gwangsu-mujeong"),
-]
+# (검색어, 저장 파일명). 위키문헌 페이지 제목은 바뀔 수 있어 검색 API 로 찾는다. 목록의 SSOT 는 shllm.data.WORKS
+WORKS: list[tuple[str, str]] = [(f"{title} {author}", slug) for author, title, slug in _WORKS]
 
 
 def api(params: dict) -> dict:

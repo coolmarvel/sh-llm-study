@@ -28,8 +28,13 @@ def ensure_data_dirs() -> None:
         d.mkdir(parents=True, exist_ok=True)
 
 
+# 물리 코어 수. os.cpu_count() 는 하이퍼스레드까지 세서(16) 두 배가 나온다 — 작은 모델은 16 스레드가 8 보다 16배 느렸다
+# (2026-09-16 측정: MLP 스텝당 8 스레드 17ms, 16 스레드 275ms — 스레드끼리 캐시·동기화 경쟁). 환경변수로 덮어쓸 수 있다.
+PHYSICAL_CORES = int(os.environ.get("SHLLM_THREADS", max(1, (os.cpu_count() or 2) // 2)))
+
+
 def setup_cpu(num_threads: int | None = None, seed: int = 1337) -> torch.device:
-    """CPU 전용 설정: 스레드 수와 시드를 고정하고 device 를 돌려준다."""
-    torch.set_num_threads(num_threads or os.cpu_count() or 1)
+    """CPU 전용 설정: 스레드 수(기본 = 물리 코어 수)와 시드를 고정하고 device 를 돌려준다."""
+    torch.set_num_threads(num_threads or PHYSICAL_CORES)
     torch.manual_seed(seed)
     return torch.device("cpu")
