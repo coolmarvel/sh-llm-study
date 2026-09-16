@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { api, fmt, type GenerateResult, type RunSummary } from '../api'
+import { fmt, generateStream, type GenStep, type GenerateResult, type RunSummary } from '../api'
 
 function Slider({ label, value, min, max, step, onChange, display }: { label: string; value: number; min: number; max: number; step: number; onChange: (v: number) => void; display?: string }) {
   return (
@@ -28,10 +28,17 @@ export default function Generate({ runs }: { runs: RunSummary[] }) {
 
   const go = async () => {
     if (!run || !prompt.trim()) return
-    setBusy(true); setError(null)
+    setBusy(true); setError(null); setPick(null)
+    const acc: GenerateResult = { prompt_tokens: [], steps: [], text: '' }
+    setResult({ ...acc })
     try {
-      const r = await api.generate({ run, prompt, max_new_tokens: maxNew, temperature, top_k: topK >= 8192 ? null : topK, top_p: topP >= 1 ? null : topP, repetition_penalty: rep, top_n: 10, seed })
-      setResult(r); setPick(r.steps.length ? 0 : null)
+      for await (const item of generateStream({ run, prompt, max_new_tokens: maxNew, temperature, top_k: topK >= 8192 ? null : topK, top_p: topP >= 1 ? null : topP, repetition_penalty: rep, top_n: 10, seed })) {
+        if ('prompt_tokens' in item) acc.prompt_tokens = item.prompt_tokens as string[]
+        else if ('text' in item) acc.text = item.text as string
+        else acc.steps = [...acc.steps, item as unknown as GenStep]
+        setResult({ ...acc })  // 토큰이 올 때마다 화면 갱신
+      }
+      setPick(acc.steps.length ? acc.steps.length - 1 : null)
     } catch (e) { setError(String(e)) } finally { setBusy(false) }
   }
   const step = result && pick != null ? result.steps[pick] : null
@@ -40,7 +47,7 @@ export default function Generate({ runs }: { runs: RunSummary[] }) {
     <div>
       <div className="flex items-baseline justify-between mb-4">
         <h1 className="h1">생성</h1>
-        <span className="label">토큰을 클릭하면 그 자리의 후보 확률이 보입니다</span>
+        <span className="label">토큰이 한 개씩 도착합니다 · 토큰을 클릭하면 그 자리의 후보 확률</span>
       </div>
       <div className="grid gap-4 two-col" style={{ gridTemplateColumns: '300px 1fr' }}>
         <div className="card flex flex-col gap-3">
@@ -64,7 +71,7 @@ export default function Generate({ runs }: { runs: RunSummary[] }) {
         <div className="flex flex-col gap-4">
           <div className="card" style={{ minHeight: 160 }}>
             <h2 className="card-title">생성문</h2>
-            {!result && <div className="label">프롬프트를 넣고 생성을 누르세요.</div>}
+            {!result && <div className="label">프롬프트를 넣고 생성을 누르세요. 토큰이 한 개씩 스트리밍됩니다.</div>}
             {result && (
               <div style={{ lineHeight: 2 }}>
                 {result.prompt_tokens.map((t, i) => <span key={`p${i}`} className="chip prompt">{show(t)}</span>)}

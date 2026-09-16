@@ -1,4 +1,4 @@
-"""대시보드 API (M6) — 학습 로그·체크포인트를 읽어 손실 곡선·어텐션 맵·토큰별 생성 확률을 제공한다.
+"""대시보드 API (M6), 학습 로그·체크포인트를 읽어 손실 곡선·어텐션 맵·토큰별 생성 확률을 제공한다.
 
     uv run uvicorn dashboard.api.main:app --port 8082 --reload      # 개발 (웹은 vite dev 서버가 /api 를 프록시)
     docker compose up                                              # 운영: 빌드된 웹 + API 를 8082 하나로
@@ -9,6 +9,7 @@
 
 from __future__ import annotations
 
+import json
 import re
 from functools import lru_cache
 from pathlib import Path
@@ -18,7 +19,7 @@ import nbformat
 import torch
 import yaml
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse, HTMLResponse
+from fastapi.responses import FileResponse, HTMLResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from nbconvert import HTMLExporter
 from pydantic import BaseModel, Field
@@ -29,6 +30,8 @@ from shllm.generate import adjust_logits, next_token_distribution
 from shllm.tokenizer import BPETokenizer
 from shllm.train import load_checkpoint, read_log
 
+from .kernels import KernelPool
+
 setup_cpu()
 app = FastAPI(title="sh-llm-study dashboard", version="0.1")
 WEB_DIST = Path(__file__).resolve().parents[1] / "web" / "dist"
@@ -36,6 +39,7 @@ BOOK_DIR = REPO_ROOT / "docs" / "book"
 NOTEBOOK_DIR = REPO_ROOT / "notebooks"
 EXECUTED_DIR = REPO_ROOT / "build" / "notebooks"  # verify.sh 가 실행한 노트북 (출력 포함)
 FRONTMATTER = re.compile(r"\A---\n(.*?)\n---\n", re.S)
+KERNELS = KernelPool(cwd=NOTEBOOK_DIR, pythonpath=REPO_ROOT / "src")
 
 
 # ---------- 실험 목록 · 손실 곡선 ----------
@@ -188,6 +192,51 @@ def generate_api(req: GenerateRequest) -> dict:
     }
 
 
+def _generate_steps(req: GenerateRequest):
+    """generate_api 와 같은 계산을 한 스텝씩 yield, 스트리밍용."""
+    model, tok, _ = _load(req.run)
+    idx = torch.tensor([tok.encode(req.prompt)])
+    g = torch.Generator().manual_seed(req.seed)
+    yield {"prompt_tokens": [tok.token_str(i) for i in idx[0].tolist()]}
+    with torch.no_grad():
+        for _ in range(req.max_new_tokens):
+            block = model.cfg.block_size
+            logits, _ = model(idx[:, -block:])
+            raw = torch.softmax(logits[:, -1, :], dim=-1)[0]
+            probs = next_token_distribution(
+                model, idx, req.temperature, req.top_k, req.top_p, req.repetition_penalty
+            )[0]
+            nxt = int(torch.multinomial(probs, 1, generator=g))
+            top = torch.topk(probs, req.top_n)
+            yield {
+                "token": tok.token_str(nxt),
+                "id": nxt,
+                "prob": float(probs[nxt]),
+                "raw_prob": float(raw[nxt]),
+                "candidates": [
+                    {
+                        "token": tok.token_str(int(i)),
+                        "prob": float(p),
+                        "raw_prob": float(raw[int(i)]),
+                    }
+                    for p, i in zip(top.values, top.indices, strict=False)
+                ],
+            }
+            idx = torch.cat([idx, torch.tensor([[nxt]])], dim=1)
+    yield {"text": tok.decode(idx[0].tolist())}
+
+
+@app.post("/api/generate/stream")
+def generate_stream(req: GenerateRequest) -> StreamingResponse:
+    """NDJSON 스트림: 첫 줄 {prompt_tokens}, 이후 한 줄에 토큰 하나, 마지막 줄 {text}."""
+
+    def lines():
+        for item in _generate_steps(req):
+            yield json.dumps(item, ensure_ascii=False) + "\n"
+
+    return StreamingResponse(lines(), media_type="application/x-ndjson")
+
+
 @app.get("/api/tokenize")
 def tokenize(run: str, text: str) -> dict:
     _, tok, _ = _load(run)
@@ -277,6 +326,136 @@ def notebook_html(name: str, executed: bool = True) -> str:
     return _notebook_html(str(path), path.stat().st_mtime)
 
 
+# ---------- 노트북 셀 편집 · 실행 (웹 내장 실행기) ----------
+
+
+class CellsPayload(BaseModel):
+    cells: list[dict]  # [{"id","cell_type","source"}]
+
+
+@app.get("/api/notebooks/{name}/cells")
+def notebook_cells(name: str) -> dict:
+    path = NOTEBOOK_DIR / f"{name}.ipynb"
+    if not path.is_file():
+        raise HTTPException(404, f"노트북 없음: {name}")
+    nb = nbformat.read(path, as_version=4)
+    # 실행본이 있으면 그 출력을 초기값으로 (verify.sh 결과), 실행 전에도 결과를 볼 수 있게
+    executed = EXECUTED_DIR / f"{name}.ipynb"
+    outputs: dict[str, list] = {}
+    if executed.exists():
+        ex = nbformat.read(executed, as_version=4)
+        if len(ex.cells) == len(nb.cells):
+            for a, b in zip(nb.cells, ex.cells, strict=False):
+                if b.cell_type == "code":
+                    outputs[a.get("id", "")] = [dict(o) for o in b.get("outputs", [])]
+    return {
+        "name": name,
+        "cells": [
+            {
+                "id": c.get("id", str(i)),
+                "cell_type": c.cell_type,
+                "source": c.source,
+                "outputs": outputs.get(c.get("id", ""), []),
+            }
+            for i, c in enumerate(nb.cells)
+        ],
+        "kernel_alive": name in KERNELS.names(),
+    }
+
+
+@app.put("/api/notebooks/{name}/cells")
+def save_notebook_cells(name: str, payload: CellsPayload) -> dict:
+    """셀 소스를 노트북 파일에 저장 (출력은 저장하지 않는다, git 규약과 같게). 순번 id 로 정규화."""
+    path = NOTEBOOK_DIR / f"{name}.ipynb"
+    if not path.is_file():
+        raise HTTPException(404, f"노트북 없음: {name}")
+    nb = nbformat.read(path, as_version=4)
+    nb.cells = [
+        nbformat.v4.new_markdown_cell(c["source"])
+        if c["cell_type"] == "markdown"
+        else nbformat.v4.new_code_cell(c["source"])
+        for c in payload.cells
+    ]
+    for i, c in enumerate(nb.cells):
+        c.id = str(i)
+        c.metadata = nbformat.NotebookNode()
+    nbformat.write(nb, path)
+    return {"saved": len(nb.cells)}
+
+
+class ExecRequest(BaseModel):
+    code: str
+
+
+@app.post("/api/notebooks/{name}/execute")
+def execute_cell(name: str, req: ExecRequest) -> StreamingResponse:
+    """NDJSON 스트림, 출력이 생길 때마다 한 줄. 커널은 노트북마다 하나, 처음 호출에 뜬다 (수 초)."""
+
+    def lines():
+        for out in KERNELS.execute(name, req.code):
+            yield json.dumps(out, ensure_ascii=False) + "\n"
+
+    return StreamingResponse(lines(), media_type="application/x-ndjson")
+
+
+@app.post("/api/notebooks/{name}/kernel/{action}")
+def kernel_action(name: str, action: str) -> dict:
+    if action == "interrupt":
+        KERNELS.interrupt(name)
+    elif action == "restart":
+        KERNELS.restart(name)
+    elif action == "shutdown":
+        KERNELS.shutdown(name)
+    elif action == "start":
+        KERNELS.get(name)
+    else:
+        raise HTTPException(400, f"알 수 없는 동작: {action}")
+    return {"name": name, "alive": name in KERNELS.names()}
+
+
+@app.get("/api/kernels")
+def list_kernels() -> list[str]:
+    return KERNELS.names()
+
+
+@app.get("/api/source")
+def source_file(path: str) -> dict:
+    """저장소 안의 소스 파일을 하이라이트한 HTML 로, 교재의 '관련 코드' 링크용. src/ scripts/ configs/ dashboard/ tests/ 만."""
+    rel = Path(path)
+    if (
+        rel.is_absolute()
+        or ".." in rel.parts
+        or rel.parts[0] not in ("src", "scripts", "configs", "tests", "dashboard", "docs")
+    ):
+        raise HTTPException(400, "허용되지 않는 경로")
+    full = REPO_ROOT / rel
+    if not full.is_file():
+        raise HTTPException(404, f"파일 없음: {path}")
+    from pygments import highlight
+    from pygments.lexers import get_lexer_for_filename
+    from pygments.util import ClassNotFound
+
+    code = full.read_text("utf-8")
+    try:
+        lexer = get_lexer_for_filename(full.name)
+    except ClassNotFound:
+        from pygments.lexers import TextLexer
+
+        lexer = TextLexer()
+    html = highlight(code, lexer, HtmlFormatter(cssclass="codehilite", linenos="table"))
+    return {
+        "path": path,
+        "lines": code.count("\n") + 1,
+        "html": html,
+        "css": HtmlFormatter(style="monokai").get_style_defs(".codehilite"),
+    }
+
+
+@app.on_event("shutdown")
+def _shutdown_kernels() -> None:
+    KERNELS.shutdown()
+
+
 # ---------- 정적 웹 (빌드 결과) ----------
 
 if WEB_DIST.exists():
@@ -288,4 +467,4 @@ if WEB_DIST.exists():
         return FileResponse(file if path and file.is_file() else WEB_DIST / "index.html")
 
 
-_ = adjust_logits  # (참고) 조정 로직은 shllm.generate 에 있다 — API 는 그것을 그대로 쓴다
+_ = adjust_logits  # (참고) 조정 로직은 shllm.generate 에 있다. API 는 그것을 그대로 쓴다

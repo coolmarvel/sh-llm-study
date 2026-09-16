@@ -12,11 +12,11 @@ const NAV: { id: View; label: string; hint: string }[] = [
   { id: 'attention', label: '어텐션', hint: '층·헤드별 시선' },
   { id: 'generate', label: '생성', hint: '토큰별 확률' },
   { id: 'book', label: '교재', hint: '0~10장' },
-  { id: 'notebooks', label: '노트북', hint: '실행 결과' },
+  { id: 'notebooks', label: '노트북', hint: '실행·편집' },
 ]
 
 function viewFromHash(): View {
-  const h = location.hash.replace('#/', '') as View
+  const h = location.hash.replace('#/', '').split('/')[0] as View
   return NAV.some((n) => n.id === h) ? h : 'runs'
 }
 

@@ -7,7 +7,7 @@ status: adopted-manual   # omd:init 의 hash-bound 패키지가 아니라 레퍼
 scope: dashboard/ 만. 노트북·교재에는 적용하지 않는다 (CLAUDE.md)
 tokens:
   colors:
-    canvas: "#0b0c0e"          # 페이지 배경 — Linear 의 #08090a 보다 한 단계 밝게 (긴 손실 곡선을 오래 봐도 눈이 덜 피로)
+    canvas: "#0b0c0e"          # 페이지 배경. Linear 의 #08090a 보다 한 단계 밝게 (긴 손실 곡선을 오래 봐도 눈이 덜 피로)
     surface: "#131417"         # 카드·패널
     surface-raised: "#1a1b1f"  # 호버 · 선택 행
     hairline: "#222327"        # 경계선 (canvas 위 8% 백색)
@@ -15,7 +15,7 @@ tokens:
     secondary: "#c3c8d1"       # 보조 텍스트
     muted: "#858a94"           # 라벨·축
     quiet: "#5d6169"           # 비활성
-    accent: "#6c74dc"          # 식별 색 하나 — 선택·포커스·현재 run. 남용 금지
+    accent: "#6c74dc"          # 식별 색 하나, 선택·포커스·현재 run. 남용 금지
     on-accent: "#0b0c0e"
     series-train: "#6c74dc"    # 손실 곡선 train
     series-val: "#e0a458"      # 손실 곡선 val (accent 와 색상환 반대편, 색약 구분 가능)
@@ -55,7 +55,7 @@ tokens:
     token-chip:     { type: chip, bg: surface-raised, fg: foreground, radius: control, padding: "2px 6px", font: mono, states: "hover → 확률 막대 표시" }
 ---
 
-# DESIGN.md — sh-llm-study 대시보드
+# DESIGN.md: sh-llm-study 대시보드
 
 ## 원칙
 
@@ -70,9 +70,11 @@ tokens:
 
 | 화면 | 목적 | 구성 |
 |---|---|---|
-| 실험 (`/`) | run 목록과 손실 곡선 | 좌: run-row 목록 · 우: chart(train/val, best 점선) + stat 4개(파라미터·step·best val·경과) |
+| 실험 (`/`) | run 목록과 손실 곡선 | 좌: run-row 목록(☐ 체크 = 그 run 의 val 을 점선으로 겹쳐 그림) · 우: chart(train/val, best 점선) + stat 4개(파라미터·step·best val·경과) |
 | 어텐션 (`/attention`) | 문장을 넣고 층·헤드별 시선 보기 | 상: field(문장) + run 선택 · 하: heatmap 격자(층 × 헤드), 셀 클릭 시 확대 |
-| 생성 (`/generate`) | 토큰별 확률을 보며 생성 | 좌: field(프롬프트) + slider-field(temperature·top-k·top-p·반복 억제) + primary-action · 우: 생성문(token-chip 나열) + 선택 토큰의 상위 10 확률 막대 |
+| 생성 (`/generate`) | 토큰별 확률을 보며 생성 | 좌: field(프롬프트) + slider-field(temperature·top-k·top-p·반복 억제) + primary-action · 우: 생성문(token-chip 이 스트리밍으로 한 개씩 추가) + 선택 토큰의 상위 10 확률 막대 |
+| 교재 (`/book`) | 교재를 웹에서 읽기 | 좌: 챕터 목록(nav-item) · 우: `.prose-dark` 본문 |
+| 노트북 (`/notebooks`) | 실행 결과 보기·JupyterLab 열기 | 좌: 노트북 목록 + 실행 여부 · 우: 실행본 HTML iframe(흰 배경, nbconvert 기본) + primary-action(JupyterLab) |
 
 ## 금지
 

@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* DESIGN.md 토큰 — 여기서만 값을 정한다. 컴포넌트는 var() 또는 아래 유틸만 쓴다 */
+/* DESIGN.md 토큰, 여기서만 값을 정한다. 컴포넌트는 var() 또는 아래 유틸만 쓴다 */
 :root {
   --canvas: #0b0c0e;
   --surface: #131417;
@@ -97,3 +97,55 @@ select.field { appearance: auto; }
 .two-col > * { min-width: 0; }
 .prose-dark table { display: block; overflow-x: auto; max-width: 100%; }
 .prose-dark img { max-width: 100%; }
+
+/* ---- 교재 레이아웃: 챕터 | 본문 | 절 목차 ---- */
+.book-layout { display: grid; grid-template-columns: 240px minmax(0, 1fr) 200px; gap: 16px; align-items: start; }
+.book-chapters { padding: 8px; position: sticky; top: 20px; }
+.book-main { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.book-article { padding: 28px 36px; }
+.book-article h1 { font-size: 24px; margin-bottom: 20px; }
+.book-article h2 { scroll-margin-top: 16px; }
+.book-article h3 { scroll-margin-top: 16px; }
+.book-article p, .book-article li { font-size: 14.5px; line-height: 1.8; }
+.book-toc { position: sticky; top: 20px; font-size: 12px; }
+.toc-item { display: block; color: var(--muted); padding: 3px 0 3px 10px; border-left: 2px solid var(--hairline); text-decoration: none; line-height: 1.35; }
+.toc-item.sub { padding-left: 22px; font-size: 11.5px; }
+.toc-item.active { color: var(--fg); border-left-color: var(--accent); }
+.toc-item:hover { color: var(--secondary); }
+.prose-dark blockquote { border-left: 3px solid var(--accent); background: var(--surface-raised); padding: 8px 14px; border-radius: 0 6px 6px 0; color: var(--secondary); }
+.prose-dark code.src-link { color: var(--accent); cursor: pointer; text-decoration: underline dotted; }
+.source-panel { max-height: 70vh; overflow: auto; }
+.source-body { font-family: var(--font-mono); font-size: 12px; line-height: 1.5; }
+.source-body table { border: 0; }
+.source-body td { border: 0; padding: 0 8px 0 0; }
+.source-body .linenos { color: var(--quiet); user-select: none; }
+.source-body pre { background: transparent; border: 0; margin: 0; padding: 0; }
+@media (max-width: 1100px) { .book-layout { grid-template-columns: 220px minmax(0, 1fr); } .book-toc { display: none; } }
+@media (max-width: 900px) { .book-layout { grid-template-columns: 1fr; } .book-chapters { position: static; } .book-article { padding: 16px; } }
+
+/* ---- 노트북 실행기 ---- */
+.toolbar { display: flex; align-items: center; gap: 10px; padding: 10px 14px; flex-wrap: wrap; }
+.kernel-dot { width: 8px; height: 8px; border-radius: 9999px; background: var(--quiet); display: inline-block; }
+.kernel-dot.idle { background: #5dbb8a; } .kernel-dot.busy { background: var(--series-val); animation: pulse 1s infinite; } .kernel-dot.starting { background: var(--accent); }
+@keyframes pulse { 50% { opacity: .3; } }
+.cell { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 8px; position: relative; border: 1px solid transparent; border-radius: 8px; padding: 6px; }
+.cell:hover { border-color: var(--hairline); }
+.cell.running { border-color: var(--accent); }
+.cell-gutter { display: flex; flex-direction: column; align-items: center; gap: 4px; padding-top: 4px; }
+.run-btn { width: 28px; height: 28px; border-radius: 6px; background: var(--surface-raised); color: var(--secondary); border: 1px solid var(--hairline); cursor: pointer; font-size: 11px; }
+.run-btn:hover { color: var(--fg); border-color: var(--accent); }
+.run-btn:disabled { opacity: .4; cursor: default; }
+.cell-body { min-width: 0; }
+.cell.markdown .cell-body { padding: 4px 8px; }
+.cell .cm-editor { border-radius: 6px; font-size: 12.5px; border: 1px solid var(--hairline); }
+.cell .cm-editor.cm-focused { outline: none; border-color: var(--accent); }
+.cell .cm-scroller { font-family: var(--font-mono) !important; line-height: 1.5; }
+.outputs { margin-top: 6px; border-left: 2px solid var(--hairline); padding-left: 10px; }
+.out { font-family: var(--font-mono); font-size: 12px; line-height: 1.5; white-space: pre-wrap; margin: 0 0 4px; color: var(--secondary); background: transparent; border: 0; padding: 0; }
+.out.stderr { color: var(--series-val); } .out.error { color: var(--danger); }
+.out-img { max-width: 100%; background: #fff; border-radius: 6px; padding: 4px; margin: 4px 0; }
+.out-html { background: #fff; color: #111; border-radius: 6px; padding: 8px; margin: 4px 0; overflow-x: auto; }
+.cell-actions { position: absolute; right: 8px; top: -10px; display: none; gap: 4px; }
+.cell:hover .cell-actions { display: flex; }
+.cell-actions button { font-size: 11px; background: var(--surface); border: 1px solid var(--hairline); color: var(--muted); border-radius: 4px; padding: 1px 6px; cursor: pointer; }
+.cell-actions button:hover { color: var(--fg); border-color: var(--accent); }

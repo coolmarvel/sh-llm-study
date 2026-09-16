@@ -1,6 +1,6 @@
 [project]
 name = "sh-llm-study"
-version = "0.1.4"
+version = "0.1.5"
 description = "LLM 개념 학습 + 밑바닥부터 소형 한글 GPT 구현 (CPU 전용)"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -19,6 +19,8 @@ dependencies = [
 dashboard = [
     "fastapi>=0.141.1",
     "httpx>=0.28.1",
+    "ipykernel>=7.3.0",
+    "jupyter-client>=8.10.0",
     "markdown>=3.10.3",
     "nbconvert>=7.17.1",
     "nbformat>=5.11.1",

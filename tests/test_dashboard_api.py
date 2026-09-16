@@ -92,7 +92,7 @@ def test_book_and_notebooks(client, tmp_path, monkeypatch):
     book = tmp_path / "book"
     book.mkdir()
     (book / "01-a.md").write_text(
-        "---\ntitle: 1장 — 테스트\n---\n# 제목\n\n본문 `code`\n\n```python\nx = 1\n```\n", "utf-8"
+        "---\ntitle: 1장 테스트\n---\n# 제목\n\n본문 `code`\n\n```python\nx = 1\n```\n", "utf-8"
     )
     nbs, ex = tmp_path / "nbs", tmp_path / "ex"
     nbs.mkdir()
@@ -111,8 +111,7 @@ def test_book_and_notebooks(client, tmp_path, monkeypatch):
     monkeypatch.setattr(main, "BOOK_DIR", book)
     monkeypatch.setattr(main, "NOTEBOOK_DIR", nbs)
     monkeypatch.setattr(main, "EXECUTED_DIR", ex)
-
-    assert client.get("/api/book").json() == [{"name": "01-a", "title": "1장 — 테스트"}]
+    assert client.get("/api/book").json() == [{"name": "01-a", "title": "1장 테스트"}]
     ch = client.get("/api/book/01-a").json()
     assert "<h1" in ch["html"] and "codehilite" in ch["html"] and ch["css"]
     assert client.get("/api/book/zz").status_code == 404
@@ -125,3 +124,66 @@ def test_book_and_notebooks(client, tmp_path, monkeypatch):
     html = client.get("/api/notebooks/01-a/html").text
     assert "노트북 제목" in html and ">1\n<" in html or "1" in html
     assert client.get("/api/notebooks/nope/html").status_code == 404
+    # 셀 읽기·저장 (저장은 출력을 버리고 순번 id 로)
+    cells = client.get("/api/notebooks/01-a/cells").json()
+    assert [c["cell_type"] for c in cells["cells"]] == ["markdown", "code"]
+    assert cells["cells"][1]["outputs"][0]["text"] == "1\n"  # 실행본 출력이 초기값
+    assert client.put(
+        "/api/notebooks/01-a/cells",
+        json={"cells": [{"id": "0", "cell_type": "code", "source": "x = 2"}]},
+    ).json() == {"saved": 1}
+    assert client.get("/api/notebooks/01-a/cells").json()["cells"][0]["source"] == "x = 2"
+
+
+def test_generate_stream(client):
+    import json as _json
+
+    r = client.post(
+        "/api/generate/stream",
+        json={"run": "demo", "prompt": "옛날", "max_new_tokens": 4, "top_n": 2},
+    )
+    assert r.status_code == 200
+    lines = [_json.loads(x) for x in r.text.strip().split("\n")]
+    assert "prompt_tokens" in lines[0] and "text" in lines[-1]
+    assert len(lines) == 6 and all("token" in x for x in lines[1:-1])
+
+
+def test_kernel_execute_stream_and_source(client, tmp_path, monkeypatch):
+    import json as _json
+
+    from dashboard.api import main
+    from dashboard.api.kernels import KernelPool
+
+    monkeypatch.setattr(
+        main, "KERNELS", KernelPool(cwd=tmp_path, pythonpath=main.REPO_ROOT / "src")
+    )
+    try:
+        r = client.post(
+            "/api/notebooks/t/execute", json={"code": "import shllm\nprint('hi', 1 + 1)\n3 * 3"}
+        )
+        outs = [_json.loads(x) for x in r.text.strip().split("\n")]
+        kinds = [o["output_type"] for o in outs]
+        assert "stream" in kinds and "execute_result" in kinds and outs[-1]["state"] == "idle"
+        assert outs[-1]["execution_count"] == 1
+        assert any(o.get("text") == "hi 2\n" for o in outs)
+        assert any(o.get("data", {}).get("text/plain") == "9" for o in outs)
+        # 상태 유지: 앞 셀의 변수가 다음 셀에 보인다
+        r = client.post("/api/notebooks/t/execute", json={"code": "y = 5\ny"})
+        r = client.post("/api/notebooks/t/execute", json={"code": "y + 1"})
+        assert any(
+            o.get("data", {}).get("text/plain") == "6"
+            for o in (_json.loads(x) for x in r.text.strip().split("\n"))
+        )
+        # 에러
+        r = client.post("/api/notebooks/t/execute", json={"code": "1/0"})
+        assert any(
+            o.get("ename") == "ZeroDivisionError"
+            for o in (_json.loads(x) for x in r.text.strip().split("\n"))
+        )
+        assert client.get("/api/kernels").json() == ["t"]
+        assert client.post("/api/notebooks/t/kernel/restart").json()["alive"]
+    finally:
+        main.KERNELS.shutdown()
+    src = client.get("/api/source", params={"path": "src/shllm/config.py"}).json()
+    assert "setup_cpu" in src["html"] and src["lines"] > 10
+    assert client.get("/api/source", params={"path": "../etc/passwd"}).status_code == 400

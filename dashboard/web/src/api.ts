@@ -35,6 +35,26 @@ async function json<T>(res: Response): Promise<T> {
 const post = (url: string, body: unknown) =>
   fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
 
+export async function* generateStream(p: GenerateParams): AsyncGenerator<Record<string, unknown>> {
+  // NDJSON 스트림을 한 줄(=한 토큰)씩 돌려준다
+  const res = await post('/api/generate/stream', p)
+  if (!res.ok || !res.body) throw new Error(`${res.status} ${await res.text()}`)
+  const reader = res.body.getReader()
+  const decoder = new TextDecoder()
+  let buf = ''
+  for (;;) {
+    const { value, done } = await reader.read()
+    if (done) break
+    buf += decoder.decode(value, { stream: true })
+    let nl: number
+    while ((nl = buf.indexOf('\n')) >= 0) {
+      const line = buf.slice(0, nl).trim()
+      buf = buf.slice(nl + 1)
+      if (line) yield JSON.parse(line)
+    }
+  }
+}
+
 export const api = {
   runs: () => fetch('/api/runs').then(json<RunSummary[]>),
   log: (run: string) => fetch(`/api/runs/${run}/log`).then(json<LogRow[]>),
@@ -43,8 +63,8 @@ export const api = {
 }
 
 export const fmt = {
-  loss: (v: number | null | undefined) => (v == null ? '—' : v.toFixed(3)),
-  params: (n: number | null) => (n == null ? '—' : `${(n / 1e6).toFixed(1)}M`),
+  loss: (v: number | null | undefined) => (v == null ? ':' : v.toFixed(3)),
+  params: (n: number | null) => (n == null ? ':' : `${(n / 1e6).toFixed(1)}M`),
   minutes: (s: number) => (s < 60 ? `${Math.round(s)}s` : `${Math.round(s / 60)}분`),
   pct: (p: number) => `${(p * 100).toFixed(1)}%`,
 }
