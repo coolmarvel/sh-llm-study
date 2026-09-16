@@ -12,7 +12,7 @@ echo "== notebooks (execute)"
 mkdir -p build/notebooks
 for nb in notebooks/*.ipynb; do
   echo "   $nb"
-  uv run jupyter nbconvert --to notebook --execute --ExecutePreprocessor.timeout=600 \
+  uv run jupyter nbconvert --to notebook --execute --ExecutePreprocessor.timeout=900 \
     --output-dir build/notebooks "$nb" >/dev/null 2>&1 || { echo "   FAILED: $nb"; exit 1; }
 done
 echo "== all passed"

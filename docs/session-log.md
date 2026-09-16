@@ -12,6 +12,33 @@ domain: development
 
 블록 형식: `## YYYY-MM-DD — 제목` 아래에 **요청/피드백 → 수정 → 검증 → 다음** 순서로 간결하게.
 
+## 2026-09-16 — 4~10장 + 본 학습 + 대시보드(M6) 일괄 구현
+
+- **요청**: "4장부터 끝까지, todo 까지 다 구현. 장별로 테스트도." (한 번에)
+- **만든 것** (장별 교재·노트북·모듈·테스트 7종 세트):
+  - 4장 `autograd.py`(Value)·`numpy_lm.py`(손 역전파)·`mlp.py`(MLP LM)·`data.get_batch` — NumPy 바이그램 val 3.58(세기 3.10), MLP T=1 val 6.85 < 2-gram 7.67
+  - 5장 `attention.py` — 문맥 8: 어텐션 한 층 val 6.40 vs MLP 8.22
+  - 6장 `model.py`(GPTConfig·Block·GPT, weight tying) — 2층·C128 600스텝 val 6.1
+  - 7장 `train.py`(Trainer·스케줄·체크포인트·JSONL)·`scripts/train.py`·`configs/{tiny-notebook,small-cpu}.yaml` — **small-cpu 본 학습** 6.8M, 2,500스텝 (결과는 아래)
+  - 8장 `generate.py`(temperature·top-k·top-p·반복 억제, 원본/조정 확률) · 9장 `eval.py`(perplexity·bits/char·scaling_experiment) · 10장 `sft.py`(작품 목록 질문-답 80개 SFT 시연, 환각 시연)
+  - `data.WORKS` 를 작품 목록 SSOT 로 승격 (download_corpus 가 import)
+  - **M6 대시보드**: `dashboard/api/main.py`(FastAPI: runs·log·attention·generate·tokenize) + `dashboard/web`(Vite·React·TS·Tailwind v4·Recharts, 화면 3개) + `dashboard/Dockerfile`·`docker-compose.yml`(8082, D 드라이브 :ro) + `DESIGN.md`(Linear 파생) + `docs/guides/{dashboard,training}.md`. Playwright 1360/400 뷰포트 확인.
+  - oh-my-design 스킬 번들 설치(`.claude/skills/omd-*`, agents, hooks). 1장 교재에 스무딩 α·Kneser-Ney 절 추가(P4).
+  - **사용자 요청(채팅)**: "docs 와 notebooks 도 사이트에서 보고, 노트북은 실행해서 결과도 보고 싶다" → 대시보드에 **교재 탭**(`/api/book`, markdown→HTML)·
+    **노트북 탭**(`/api/notebooks`, verify.sh 실행본 `build/notebooks/` 를 nbconvert HTML 로 + JupyterLab 열기 버튼) 추가, 컴포즈에 **`lab` 서비스**(JupyterLab 8888,
+    Dockerfile target `lab`, Noto CJK 폰트, src/notebooks/docs/configs/build 마운트, D 드라이브 rw) 추가. 가이드·CLAUDE.md 갱신.
+- **사고·결정 (근거 1줄씩)**:
+  - `setup_cpu()` 기본 16 스레드 → MLP 스텝 275ms, 8 스레드 17ms (**16배**). 기본을 물리 코어(`PHYSICAL_CORES`)로 변경.
+  - 4장 검증 loss 를 val 전체(11만×2,827 softmax = 1.3GB)로 계산해 스왑 → 2만 토큰 / 배치 평균으로.
+  - small-cpu 초안(문맥 256, 6,000스텝)은 스텝당 5초·10시간 + 코퍼스 49만 토큰이라 과적합 확정 → 문맥 128·dropout 0.2·2,500스텝(약 1시간).
+  - `omd install-skills` 가 `.claude/settings.json` 의 Remote Control 차단 키를 삭제 → 즉시 복원. CLAUDE.md 에 경고.
+  - Dockerfile `COPY a b ./dir/` 는 b 디렉토리 **내용**을 푼다 → `dashboard.api` import 실패 → 경로 분리.
+  - Playwright MCP 는 `pkill -f uvicorn` 문자열이 자기 명령줄에도 걸려 대기 작업이 죽음 → 이후 `pkill` 패턴 주의.
+  - DESIGN.md 는 `/omd:init` 의 hash-bound 패키지 대신 카탈로그에서 손으로 파생 (스킬은 새 세션에서만 로드됨) — todo P3.
+- **본 학습 결과 (small-cpu)**: 2,500 스텝 45분, best val **5.485** @2100 (train 4.77), 마지막 5.49 — 2,100 이후 정체(과적합 시작). perplexity 241, 글자당 3.48 bit (문자 3-gram 4.15). 생성문은 어절·대화 부호는 살아 있으나 문단 의미는 이어지지 않음 (v1.0 판정은 사용자, todo P1).
+- **검증**: `bash scripts/verify.sh` 통과 (ruff · pytest 58 · 노트북 정규화 · 노트북 11개 실행 ~30분). PDF v0.1.4(11장) 바탕화면 교체. 버전 0.1.4. 장별 커밋·푸시.
+- **다음**: 사용자 v1.0 판정 → 코퍼스 2차 확장 (todo P1).
+
 ## 2026-09-16 — 사고: VS Code 에서 노트북이 열자마자 dirty (03)
 
 - **피드백(채팅)**: "03 을 열면 변경사항이 자꾸 생겨 바로 닫기가 안 된다. 다른 노트북은 괜찮다."

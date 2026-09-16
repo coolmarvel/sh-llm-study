@@ -12,23 +12,22 @@ domain: development
 
 ## P1 — 다음 릴리스에서 다뤄야 함
 
-- [ ] **M2 4장** 신경망 기초 — autograd·경사하강 NumPy 재현 → PyTorch MLP 언어모델 (Bengio 2003), `src/shllm/mlp.py`(가칭) (`docs/plans/0001-mvp.md`)
-- [ ] 7장 학습 후 3장 노트북의 PCA 그림을 학습된 토큰 임베딩으로 다시 그리기 (`notebooks/03-embedding.ipynb` §2 참조)
+- [ ] **v1.0 선언 여부** — 브리프 성공 기준("한글 프롬프트를 이어서 말이 되는 문단")을 사용자가 노트북 08 / 대시보드 생성 화면에서 판정. 통과면 MINOR 승격은 사용자 선언 (CLAUDE.md 버전 정책)
+- [ ] **코퍼스 2차 확장** (한국어 위키 일부, 수백 MB) — 7장 결과: 49만 토큰으로는 6.8M 모델이 약 1,000스텝부터 과적합. 데이터가 병목 (`scripts/download_corpus.py` 확장, `docs/book/07-training.md` 7.4)
 
 ## P2 — 가까운 로드맵
 
-- [ ] M2~M5 장들 (`docs/plans/0001-mvp.md`)
-- [ ] M6 착수 시: `npx oh-my-design-cli@latest` 설치 + `/omd:init Linear` → `DESIGN.md` (CLAUDE.md 디자인 절)
-- [ ] 코퍼스 2차 확장(한국어 위키 일부) 여부 — 7장 학습 결과 보고 결정
-- [ ] 프로젝트 어휘 크기 확정 — 지금은 `bpe-8192.json`(2.10자/토큰). 9장에서 4096/8192 손실 비교 후 결정. 토크나이저 바꾸면 체크포인트 호환 깨짐
-- [ ] 10장 스코프: 사용자 최종 기대는 "대화" — 미니 SFT(대화 형식 파인튜닝) 데모를 넣을지 사용자와 결정 (2026-09-16 질문)
+- [ ] 코퍼스 확장 후 `configs/small-cpu.yaml` 재학습 (block_size 256, 더 긴 스텝) → 9장 표·8장 생성문·대시보드 갱신
+- [ ] 10장 SFT: 진짜 한국어 대화 데이터로 "형식" 학습 확장 (현재는 작품 목록 질문-답 80개 시연)
 
 ## P3 — 품질
 
-- [ ] `scripts/download_corpus.py` 의 `drop_boilerplate` 는 위키문헌 페이지 구조에 의존 — 페이지가 바뀌면 깨질 수 있음. 합본에 남은 잡음 문구 4건 확인
-
-- [ ] `NGramModel.loss` 는 파이썬 루프(1.1M 토큰 × n 회 dict 조회, n=5 에 ~6초) — 9장 평가에서 재사용하면 벡터화 검토
+- [ ] `DESIGN.md` 를 `/omd:init linear.app` 의 hash-bound 패키지로 교체 (새 세션에서 스킬 로드 필요). 실행 후 `.claude/settings.json` 의 Remote Control 키 복원 확인 (2026-09-16 사고: `omd install-skills` 가 지움)
+- [ ] `scripts/download_corpus.py` 의 `drop_boilerplate` 는 위키문헌 페이지 구조에 의존 — 2026-09-16 재확인: 합본에 위키문헌/라이선스/[편집]/목차 잔재 0건. 페이지 구조가 바뀌면 재확인
+- [ ] 대시보드: 생성 스트리밍(현재는 완료 후 한 번에 응답, 60토큰 ≈ 3초), run 여러 개 겹쳐 그리기
+- [ ] `NGramModel.loss` 파이썬 루프 — 9장에서 val 5.4만 토큰에 2~3초라 벡터화 불필요. 코퍼스 확장 시 재검토
 
 ## P4 — 아이디어
 
-- [ ] 1장 확장: n-gram 보간 α 를 val 로 고르는 실험 (α=3 이 n≥3 에서 val 더 낮음 — 세션 실험 메모), Kneser-Ney 소개
+- [ ] 3장 노트북의 PCA 그림을 학습된 임베딩으로 (7장 노트북 §4 에 이웃 표는 있음)
+- [ ] KV 캐시로 생성 속도, RoPE 위치 부호화, block_size 512 — 코퍼스 확장 후

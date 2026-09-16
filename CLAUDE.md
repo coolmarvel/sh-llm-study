@@ -27,6 +27,7 @@
    **`docs/book/` 이 바뀌면 같은 턴에 `uv run python scripts/build_book.py`** — 바탕화면(`/mnt/c/Users/user/Desktop/`)의
    이전 판 `sh-llm-study-book-*.pdf` 를 지우고 새 판을 복사한다 (항상 최신 한 권만, 사용자 지시 2026-09-16).
    학습된 모델 = `data/checkpoints/<run>/` (D 드라이브, 탐색기로 확인 가능). 대시보드 = 도커 8082 포트에서 사용자와 함께 확인.
+   사용자는 교재·노트북을 **사이트(8082 교재/노트북 탭, 8888 JupyterLab)** 에서 본다 — verify.sh 의 실행본(`build/notebooks/`)이 노트북 탭의 결과이므로 검증을 건너뛰지 않는다.
 
 ## 버전 정책 (semver `MAJOR.MINOR.PATCH`)
 
@@ -86,9 +87,10 @@ uv run jupyter lab                             # 노트북 실습
 uv run pytest                                  # 단위 테스트
 uv run ruff format . && uv run ruff check .    # 포맷·린트 (Write/Edit 훅이 .py 는 자동 포맷)
 bash scripts/verify.sh                         # 검증 전체 (커밋 전 필수)
-# 긴 학습(7장 이후): uv run python scripts/train.py --config configs/<이름>.yaml
+# 긴 학습(7장):      nohup uv run python -u scripts/train.py --config configs/small-cpu.yaml > data/runs/small-cpu.out 2>&1 &   (--resume 로 이어서)
 # 교재 PDF:         uv run python scripts/build_book.py   # build/book/ + 바탕화면 교체 (--no-copy 로 굽기만)
-# 대시보드(M6):     docker compose up  → http://localhost:8082
+# 대시보드(M6):     docker compose up --build -d  → 8082 대시보드(실험·어텐션·생성·교재·노트북) + 8888 JupyterLab
+#                   개발: uv run uvicorn dashboard.api.main:app --port 8082 + cd dashboard/web && npm run dev
 ```
 
 노트북은 `nbstripout` git 필터가 출력을 제거하고 커밋한다 (`uv run nbstripout --install` 이 clone 마다 필요).
@@ -100,13 +102,14 @@ bash scripts/verify.sh                         # 검증 전체 (커밋 전 필�
 |---|---|
 | `src/shllm/config.py` | 경로 SSOT(`DATA_DIR`·`CORPUS_DIR`·`CHECKPOINT_DIR`…) + `setup_cpu()`. 경로를 다른 곳에 하드코딩하지 않는다 |
 | `src/shllm/data.py` | 코퍼스 읽기 (`load_corpus`, `list_work_files`) |
-| `src/shllm/tokenizer.py` | 1장 `CharTokenizer` → 2장 `BPETokenizer` |
-| `src/shllm/{embedding,attention,model,train,generate}.py` | 3·5·6·7·8장에서 생성 (아직 없음) |
+| `src/shllm/tokenizer.py` | 1장 `CharTokenizer` · 2장 `BPETokenizer` (프로젝트 토크나이저 `data/tokenizers/bpe-8192.json`) |
+| `src/shllm/{bigram,embedding,autograd,numpy_lm,mlp,attention,model,train,generate,eval,sft}.py` | 1·3·4·4·4·5·6·7·8·9·10장 모듈 (동작 요약: `docs/guides/training.md`) |
+| `dashboard/api/main.py` · `dashboard/web/src/` | M6 대시보드 FastAPI + React (`docs/guides/dashboard.md`, 디자인 계약 `DESIGN.md`) |
 | `notebooks/NN-*.ipynb` | 장별 실습. 검증된 코드는 반드시 `src/shllm/` 로 옮기고 노트북은 import 해서 쓴다 |
 | `docs/book/NN-*.md` | 장별 교재. 노트북과 번호·제목이 1:1 |
 | `tests/test_*.py` | 모듈별 단위 테스트 (round-trip, shape, 작은 학습이 손실을 줄이는지) |
 | `scripts/` | `download_corpus.py`(코퍼스) · `verify.sh`(검증) · `build_book.py`(교재 PDF) · `normalize_notebooks.py`(노트북 메타데이터 표준화 — 새 노트북 저장 후 실행) · `hooks/`(하네스) · 이후 `train.py` |
-| `configs/` | 학습 설정 YAML (7장 이후) |
+| `configs/` | `tiny-notebook.yaml`(노트북 600스텝) · `small-cpu.yaml`(v1.0 본 학습, 약 1시간) |
 | `data/` → `/mnt/d/sh-llm-data` | corpus/ tokenizers/ checkpoints/ runs/ — git 에 안 들어감 |
 
 **새 장 추가 = ① `docs/book/NN-제목.md` ② `notebooks/NN-제목.ipynb` ③ `src/shllm/모듈.py` ④ `tests/test_모듈.py`
@@ -120,8 +123,10 @@ bash scripts/verify.sh                         # 검증 전체 (커밋 전 필�
 
 대시보드(M6, `dashboard/`)에만 적용. 챕터 노트북·교재에는 해당 없음.
 
-디자인 레퍼런스: **Linear** (베이스), 차용 없음 — ADR-0002. **M6 착수 시** `npx oh-my-design-cli@latest` 설치 후
-`/omd:init Linear` 로 `DESIGN.md` 를 만든다 (킥오프 시점엔 미설치 — todo P2).
+디자인 레퍼런스: **Linear** (베이스), 차용 없음 — ADR-0002. oh-my-design 스킬 번들은 2026-09-16 설치됨 — 스킬·카탈로그(24MB)는 git 제외,
+clone 마다 `npx oh-my-design-cli@latest install-skills --agent claude-code --all --lang ko` 로 재설치 (훅·에이전트·settings 는 커밋됨).
+`DESIGN.md` 는 레퍼런스 카탈로그(`.claude/data/references/linear.app`)에서 손으로 파생한 판 — `/omd:init` 의 hash-bound 패키지로 바꾸려면 새 세션에서 실행 (todo P3).
+**주의**: `omd install-skills` 는 `.claude/settings.json` 을 덮어써 Remote Control 차단 키를 지운다 → 실행 후 반드시 복원 (2026-09-16 사고).
 디자인 계약은 루트 **`DESIGN.md`** (프로젝트 소유, 커밋 대상). 색·간격·컴포넌트 구조는 여기서만 정하고
 코드에 임의 값을 넣지 않는다. 설치 확인: `npx oh-my-design-cli@latest doctor`.
 
