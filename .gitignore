@@ -1,0 +1,41 @@
+# 환경 변수·시크릿
+.env
+.env.*
+!.env.example
+
+# 에이전트 로컬 설정 (permissions 캐시 등 — 개인 것)
+.claude/settings.local.json
+
+# OS/에디터
+.DS_Store
+Thumbs.db
+
+# 로그
+*.log
+
+# 의존성·빌드 산출물 — 킥오프에서 스택에 맞게 보강한다
+# node_modules/
+# dist/
+# vendor/
+# __pycache__/
+
+# --- Python (uv) ---
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+
+# --- Jupyter ---
+.ipynb_checkpoints/
+
+# --- 데이터·모델 (D 드라이브 심볼릭 링크 — 머신 종속) ---
+data
+
+# --- 대시보드 (Node) ---
+node_modules/
+dist/
+
+# --- 교재 빌드 산출물 ---
+build/
