@@ -12,6 +12,20 @@ domain: development
 
 블록 형식: `## YYYY-MM-DD — 제목` 아래에 **요청/피드백 → 수정 → 검증 → 다음** 순서로 간결하게.
 
+## 2026-09-16 — M1 1장: 문자 토크나이저 + 바이그램/n-gram
+
+- **요청**: "진행해줘" (1장 착수). Docker Desktop 실행 확인 요청 → `docker` 29.7 동작 확인, todo P2/plan 항목 해소.
+- **만든 것**: `src/shllm/bigram.py`(`BigramModel` (V,V) 텐서 + `NGramModel` dict 보간), `tests/test_bigram.py`(6개),
+  `docs/book/01-char-tokenizer-bigram.md`, `notebooks/01-char-tokenizer-bigram.ipynb`(31셀, 실행 ~50초),
+  `data/tokenizers/char.json`(V=2,827). 버전 0.1.0 → 0.1.1 (PATCH).
+- **설계 결정(사고 기록)**: 라플라스 스무딩 α=1 은 V=2,827 에서 실제 횟수를 묻어 생성이 한자 범벅이 됨 → `BigramModel`
+  기본 α=0.01. n≥3 은 균등분포 스무딩으로는 문맥 하나만 못 봐도 생성이 즉시 무너짐 → `NGramModel` 은 한 단계 짧은
+  문맥 분포로 **보간**(재귀). 결과 val loss: 균등 7.95 / bigram 3.17 / 3-gram 2.88(최소) / 5-gram 3.50(과적합).
+- **검증**: `bash scripts/verify.sh` 통과 (ruff · pytest 10 passed · 노트북 00·01 실행). 로컬 커밋 완료.
+- **푸시 보류**: git 원격이 없고 GitHub 에 `coolmarvel/sh-llm-study` 도 없음. 저장소 생성(공개/비공개)은 사용자 결정 → 생성 후 `git remote add origin … && git push -u origin main`.
+- **미처리**: 루트 `Untitled.ipynb`(빈 노트북, Jupyter 가 만든 것으로 추정) 은 건드리지 않음 — 사용자 확인 필요.
+- **다음**: M1 2장 BPE 토크나이저 (`BPETokenizer`, `data/tokenizers/` 저장 규약).
+
 ## 2026-09-16 — 킥오프 완료
 
 - **요청**: "나만의 LLM 을 만들어보고 싶다. 개념부터 배우고 구현하고 싶다." (project-seed 메뉴 위저드)
