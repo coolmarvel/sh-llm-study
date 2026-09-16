@@ -1,0 +1,23 @@
+# v1.1, 근대문학 + 위키 혼합 코퍼스 (ADR-0003). scripts/train.py --config configs/mixed-cpu.yaml (CPU 약 2시간)
+# 모델은 small-cpu 와 동일(6.8M)해서 데이터 효과만 비교한다. 토크나이저는 혼합 코퍼스로 새로 학습한 것.
+model:
+  vocab_size: 8192
+  block_size: 128
+  n_layer: 6
+  n_head: 8
+  n_embd: 256
+  dropout: 0.1        # 데이터가 10배 이상이라 드롭아웃은 낮춘다
+train:
+  run_name: mixed-cpu
+  corpus: korean-mixed
+  tokenizer: bpe-8192-mixed.json
+  batch_size: 48
+  max_steps: 5000     # 6,144 토큰/스텝 × 5,000 ≈ 3,000만 토큰
+  lr: 6.0e-4
+  min_lr: 6.0e-5
+  warmup_steps: 200
+  weight_decay: 0.1
+  grad_clip: 1.0
+  eval_every: 200
+  eval_batches: 8
+  ckpt_every: 200

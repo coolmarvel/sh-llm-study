@@ -1,8 +1,8 @@
-"""학습 루프 (7장) — 4장 train_steps 에 실전 요소를 붙인 완성판.
+"""학습 루프 (7장), 4장 train_steps 에 실전 요소를 붙인 완성판.
 
     TrainConfig     학습 하이퍼파라미터 (배치·스텝·학습률 스케줄·평가 주기·체크포인트 주기)
     Trainer         한 run 을 책임진다: 데이터 → 배치 → 순전파/역전파 → AdamW → 로그(JSONL) → 체크포인트
-    load_checkpoint 저장된 run 에서 모델(+설정)을 되살린다 — 8장 생성·9장 평가·대시보드가 쓴다
+    load_checkpoint 저장된 run 에서 모델(+설정)을 되살린다, 8장 생성·9장 평가·대시보드가 쓴다
 
 파일 규약 (config.RUNS_DIR / CHECKPOINT_DIR 아래 run 이름으로):
     data/runs/<run>/log.jsonl         한 줄 = 한 평가 시점 {"step", "train_loss", "val_loss", "lr", "elapsed"}
@@ -39,12 +39,13 @@ class TrainConfig:
     min_lr: float = 6e-5  # 코사인 감쇠가 끝나는 값
     warmup_steps: int = 100  # 처음엔 작게 시작해 여기까지 선형으로 올린다
     weight_decay: float = 0.1
-    grad_clip: float = 1.0  # 기울기 크기 상한 — 가끔 튀는 배치가 학습을 망치지 않게
+    grad_clip: float = 1.0  # 기울기 크기 상한, 가끔 튀는 배치가 학습을 망치지 않게
     eval_every: int = 100
     eval_batches: int = 20  # 평가 때 train/val 각각 몇 배치 평균
     ckpt_every: int = 500
     seed: int = 1337
     tokenizer: str = "bpe-8192.json"  # data/tokenizers/ 안의 파일 이름 (체크포인트에 같이 기록)
+    corpus: str = "korean-classics"  # data/corpus/<이름>.txt (ADR-0003: korean-mixed 는 위키 혼합)
     extra: dict = field(default_factory=dict)  # yaml 에 있는 그 밖의 키
 
 
@@ -156,7 +157,7 @@ class Trainer:
             lr = lr_at(self.step, cfg)
             for group in self.optimizer.param_groups:
                 group["lr"] = lr
-            # (2) 평가·로그 — 스텝 0 도 기록해 곡선이 처음부터 보이게
+            # (2) 평가·로그, 스텝 0 도 기록해 곡선이 처음부터 보이게
             if self.step % cfg.eval_every == 0:
                 losses = self.estimate_loss()
                 rec = {

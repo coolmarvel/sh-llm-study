@@ -1,4 +1,4 @@
-"""긴 학습 (7장) — 노트북 밖에서 몇 시간 돌리는 스크립트.
+"""긴 학습 (7장), 노트북 밖에서 몇 시간 돌리는 스크립트.
 
     uv run python scripts/train.py --config configs/small-cpu.yaml            # 처음부터
     uv run python scripts/train.py --config configs/small-cpu.yaml --resume   # data/checkpoints/<run>/ckpt.pt 에서 이어서
@@ -52,7 +52,7 @@ def main() -> None:
             f"토크나이저 어휘 {tok.vocab_size} ≠ model.vocab_size {model_cfg.vocab_size}"
         )
     t0 = time.time()
-    data = torch.tensor(tok.encode(load_corpus("korean-classics")))  # D 드라이브는 한 번만 읽는다
+    data = torch.tensor(tok.encode(load_corpus(train_cfg.corpus)))  # D 드라이브는 한 번만 읽는다
     n = int(0.9 * len(data))
     print(
         f"코퍼스 {len(data):,} 토큰 (인코딩 {time.time() - t0:.0f}s) → train {n:,} / val {len(data) - n:,}"
