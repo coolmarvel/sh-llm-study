@@ -32,7 +32,7 @@ def test_mlp_forward_shapes_and_training():
     x = torch.randint(0, V, (5, T))
     logits, loss = model(x, torch.randint(0, V, (5,)))
     assert logits.shape == (5, V) and loss.ndim == 0
-    # 문맥의 마지막 두 토큰 합 mod V 가 다음 토큰인 규칙 — 바이그램은 못 풀고 문맥 2개면 풀린다
+    # 문맥의 마지막 두 토큰 합 mod V 가 다음 토큰인 규칙, 바이그램은 못 풀고 문맥 2개면 풀린다
     seq = [1, 2]
     for _ in range(600):
         seq.append((seq[-1] + seq[-2]) % V)

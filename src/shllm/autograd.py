@@ -1,4 +1,4 @@
-"""스칼라 자동미분 (4장) — PyTorch 의 autograd 가 하는 일을 숫자 하나짜리 버전으로 직접 만든다.
+"""스칼라 자동미분 (4장). PyTorch 의 autograd 가 하는 일을 숫자 하나짜리 버전으로 직접 만든다.
 
 Value 는 숫자 하나(data)와 "이 값이 최종 결과에 얼마나 영향을 주는가"(grad)를 가진다.
 연산을 할 때마다 어떤 값들로부터 어떤 연산으로 만들어졌는지(_prev, _backward)를 기억해 두고,
@@ -8,7 +8,7 @@ backward() 는 그 그래프를 거꾸로 따라가며 연쇄법칙으로 grad �
     z = x * y + x            # z = 2·3 + 2 = 8
     z.backward()             # dz/dx = y + 1 = 4,  dz/dy = x = 2
 
-torch.Tensor 도 원리는 같다 — 텐서 단위로, C++ 로, 수백 가지 연산에 대해 구현돼 있을 뿐이다.
+torch.Tensor 도 원리는 같다, 텐서 단위로, C++ 로, 수백 가지 연산에 대해 구현돼 있을 뿐이다.
 (Andrej Karpathy 의 micrograd 를 이 교재의 용어로 다시 쓴 것.)
 """
 

@@ -1,5 +1,5 @@
 #!/bin/bash
-# 검증 명령 전체 — 커밋 메시지 작성·산출물 전달 전에 반드시 통과 (CLAUDE.md "변경 후 자동 규칙")
+# 검증 명령 전체, 커밋 메시지 작성·산출물 전달 전에 반드시 통과 (CLAUDE.md "변경 후 자동 규칙")
 set -euo pipefail
 export PATH="$HOME/.local/bin:$PATH"
 cd "$(dirname "$0")/.."

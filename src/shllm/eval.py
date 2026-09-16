@@ -1,8 +1,8 @@
-"""평가 (9장) — "잘 됐는지 어떻게 아나".
+"""평가 (9장). "잘 됐는지 어떻게 아나".
 
     evaluate_loss(model, data, block_size, batch_size, n_batches)   val 토큰당 평균 loss (nat)
-    perplexity(loss)                                                 exp(loss) — "매 순간 몇 개 중 하나를 찍는 셈인가"
-    bits_per_char(loss_per_token, n_tokens, n_chars)                 토큰당 loss 를 글자당 bit 로 환산 — 토크나이저가 달라도 비교 가능
+    perplexity(loss)                                                 exp(loss). "매 순간 몇 개 중 하나를 찍는 셈인가"
+    bits_per_char(loss_per_token, n_tokens, n_chars)                 토큰당 loss 를 글자당 bit 로 환산, 토크나이저가 달라도 비교 가능
     scaling_experiment(...)                                          모델 크기별로 짧게 학습해 (파라미터 수, val loss) 표를 만든다
 
 토큰당 loss 는 토크나이저가 다르면 비교할 수 없다 (2장). 같은 텍스트를 글자 단위로 환산하면 공정하다:
@@ -77,7 +77,7 @@ def scaling_experiment(
             lr=lr,
             min_lr=lr / 10,
             warmup_steps=max(10, steps // 20),
-            eval_every=max(50, steps),  # 중간 평가는 생략 (시간 절약) — 처음과 끝만
+            eval_every=max(50, steps),  # 중간 평가는 생략 (시간 절약), 처음과 끝만
             eval_batches=8,
             ckpt_every=steps,
         )

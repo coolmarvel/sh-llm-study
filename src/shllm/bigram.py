@@ -1,4 +1,4 @@
-"""n-gram 통계 언어모델 (1장) — "다음 글자 확률표" 하나로 텍스트를 생성한다.
+"""n-gram 통계 언어모델 (1장). "다음 글자 확률표" 하나로 텍스트를 생성한다.
 
 언어모델은 결국 P(다음 토큰 | 지금까지의 토큰들) 을 계산하는 함수다 (0장).
 이 모듈은 그 함수를 가장 단순한 방법, 즉 **세어서 나누기** 로 만든다.
@@ -12,7 +12,7 @@
     next_token_probs(context)   (V,) 확률 벡터
     generate(start, n)          확률대로 하나씩 뽑아 이어 붙인다
     loss(ids)                   평균 음의 로그가능도 (작을수록 좋다, 단위 nat)
-    perplexity(ids)             exp(loss) — "매 순간 몇 개 중에 하나를 고르는 셈인가"
+    perplexity(ids)             exp(loss). "매 순간 몇 개 중에 하나를 고르는 셈인가"
 
 4장 이후의 신경망 모델도 같은 세 가지(확률 계산·생성·손실)를 하며, 달라지는 것은
 "세어서 나누기" 대신 "파라미터를 학습해서" 확률표를 만든다는 점뿐이다.
@@ -30,7 +30,7 @@ class BigramModel:
     """바이그램 모델: counts[a, b] = 토큰 a 바로 다음에 토큰 b 가 나온 횟수.
 
     smoothing(가산 스무딩) 은 모든 칸에 미리 더해 두는 가짜 횟수다. 0 이면 한 번도 안 나온
-    쌍의 확률이 0 이 되어 loss 가 무한대로 터진다 — 학습에 없던 조합이 검증 텍스트에는 있기 때문.
+    쌍의 확률이 0 이 되어 loss 가 무한대로 터진다, 학습에 없던 조합이 검증 텍스트에는 있기 때문.
     교과서의 "라플라스 스무딩" 은 1 을 더하지만, 어휘가 수천 자면 행마다 가짜 횟수가 수천 개 생겨
     실제 횟수를 묻어 버린다 (노트북 01 에서 확인). 그래서 기본값은 0.01 이다.
     """
@@ -91,7 +91,7 @@ class NGramModel:
 
     counts[k][문맥][다음 토큰] = 횟수. k 는 문맥 길이(0 ~ n-1), 문맥은 튜플이라 dict 키로 쓸 수 있다
     (자바의 Map<List<Integer>, Map<Integer, Integer>>). 가능한 문맥이 V^(n-1) 가지라 n=3 만 돼도
-    텐서로는 못 든다 — 실제로 등장한 문맥만 dict 에 담는다. 짧은 문맥의 표도 전부 같이 센다(표가 n 개).
+    텐서로는 못 든다, 실제로 등장한 문맥만 dict 에 담는다. 짧은 문맥의 표도 전부 같이 센다(표가 n 개).
 
     스무딩은 BigramModel 과 다르다. 균등분포(아무 글자나) 대신 **한 단계 짧은 문맥의 분포** 를 섞는다:
 
@@ -109,7 +109,7 @@ class NGramModel:
         self.n = n
         self.vocab_size = vocab_size
         self.smoothing = smoothing
-        # defaultdict: 없는 키를 읽으면 기본값을 만들어 넣는다 — Map.computeIfAbsent 와 같다
+        # defaultdict: 없는 키를 읽으면 기본값을 만들어 넣는다. Map.computeIfAbsent 와 같다
         self.counts: list[dict[tuple[int, ...], dict[int, int]]] = [
             defaultdict(lambda: defaultdict(int)) for _ in range(n)
         ]
@@ -148,7 +148,7 @@ class NGramModel:
         return p / (self.totals[k].get(ctx, 0) + a)
 
     def _prob(self, tokens: list[int], k: int, target: int) -> float:
-        """_probs_vec 과 같은 식을 토큰 하나(target)에 대해서만 — loss 계산용 (벡터를 만들면 느리다)."""
+        """_probs_vec 과 같은 식을 토큰 하나(target)에 대해서만, loss 계산용 (벡터를 만들면 느리다)."""
         a = self.smoothing
         base = 1 / self.vocab_size if k == 0 else self._prob(tokens, k - 1, target)
         ctx = self._ctx(tokens, k)

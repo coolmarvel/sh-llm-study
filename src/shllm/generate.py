@@ -1,8 +1,8 @@
-"""텍스트 생성 (8장) — 확률에서 토큰을 뽑는 방법들.
+"""텍스트 생성 (8장), 확률에서 토큰을 뽑는 방법들.
 
     generate(model, idx, max_new_tokens, temperature, top_k, top_p, repetition_penalty)
         GPT 의 forward 를 반복해 한 토큰씩 붙인다. 6장 노트북부터 미리 쓰고 8장에서 뜯어본다.
-    next_token_distribution(model, idx, ...)   한 스텝의 (조정된) 확률 — 대시보드 "토큰별 확률" 뷰용
+    next_token_distribution(model, idx, ...)   한 스텝의 (조정된) 확률, 대시보드 "토큰별 확률" 뷰용
     generate_text(model, tok, prompt, ...)     문자열 → 문자열 편의 함수
 
 모든 조정은 logits(점수) 단계에서 한다. 순서: 반복 억제 → temperature → top-k → top-p → softmax → multinomial.

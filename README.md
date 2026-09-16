@@ -4,8 +4,8 @@ LLM 개념을 챕터별로 배우면서, **CPU 만으로 소형 한글 GPT 를 �
 
 - 교재: `docs/book/00~10-*.md` 11장 → `scripts/build_book.py` 가 PDF 한 권으로
 - 실습: `notebooks/NN-*.ipynb`
-- 코드: `src/shllm/` — 토크나이저 → 임베딩 → autograd/MLP → 어텐션 → GPT → 학습 → 생성 → 평가 → SFT
-- 대시보드: `dashboard/` — 손실 곡선·어텐션 맵·토큰별 생성 확률 (`docker compose up --build -d` → http://localhost:8082)
+- 코드: `src/shllm/`, 토크나이저 → 임베딩 → autograd/MLP → 어텐션 → GPT → 학습 → 생성 → 평가 → SFT
+- 대시보드: `dashboard/`, 손실 곡선·어텐션 맵·토큰별 생성 확률 (`docker compose up --build -d` → http://localhost:8082)
 - 데이터: `data/` → `D:\sh-llm-data` (코퍼스·토크나이저·체크포인트·실험 로그)
 
 ## 시작하기
@@ -27,10 +27,10 @@ uv run python -c "from shllm.train import load_checkpoint; from shllm.tokenizer 
 
 ## 문서
 
-- `docs/brief.md` — 왜/무엇
-- `docs/plans/0001-mvp.md` — 챕터 로드맵
-- `docs/adr/0002-stack.md` — 스택·저장·디자인 결정
+- `docs/brief.md`, 왜/무엇
+- `docs/plans/0001-mvp.md`, 챕터 로드맵
+- `docs/adr/0002-stack.md`, 스택·저장·디자인 결정
 
 ---
 
-© 2026 이성현 (SeongHyun Lee). All rights reserved. — `LICENSE`
+© 2026 이성현 (SeongHyun Lee). All rights reserved., `LICENSE`

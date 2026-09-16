@@ -8,18 +8,37 @@ domain: development
 # 세션 로그 (최신이 위)
 
 이 파일이 **"언제 무슨 일이 있었나"의 SSOT**다. 세션마다 최상단에 블록 추가.
-(커밋/푸시는 사용자가 직접·성긴 단위 — git history 를 이력 SSOT 로 삼지 않는다.)
+(커밋/푸시는 사용자가 직접·성긴 단위, git history 를 이력 SSOT 로 삼지 않는다.)
 
-블록 형식: `## YYYY-MM-DD — 제목` 아래에 **요청/피드백 → 수정 → 검증 → 다음** 순서로 간결하게.
+블록 형식: `## YYYY-MM-DD, 제목` 아래에 **요청/피드백 → 수정 → 검증 → 다음** 순서로 간결하게.
 
-## 2026-09-16 — 4~10장 + 본 학습 + 대시보드(M6) 일괄 구현
+## 2026-09-16 (오후) v1.1: 코퍼스 확장·웹 내장 노트북 실행기·교재 보강·줄표 제거
+
+- **요청**: "다음 todo 를 네 판단으로 설계·진행" → plans/0002, ADR-0003. 이어서 피드백 넷:
+  ① "교재·노트북이 너무 당연하다는 듯이만 적혀 있다, 더 상세하게" ② "JupyterLab 을 따로 띄우지 말고 웹에서 실행" ③ "교재 UI 가 구리다"
+  ④ "줄표 기호 쓰지 마라. 어디서든 다".
+- **코퍼스 2차 확장** (ADR-0003): `scripts/download_wiki.py` 위키 알찬·좋은 글 401편 + 링크 이웃 → 673편 1,000만 자 (CC BY-SA, `WIKI-LICENSE.md`).
+  `korean-mixed.txt` 1,110만 자 → `bpe-8192-mixed.json` (624만 토큰, 글자당 1.79). `configs/mixed-cpu.yaml` (6.8M, 5,000스텝, dropout 0.1).
+  `TrainConfig.corpus` 필드, `scripts/train_tokenizer.py`.
+- **웹 내장 노트북 실행기**: `dashboard/api/kernels.py` (jupyter_client 로 노트북별 ipykernel, NDJSON 출력 스트림, 중단·재시작), 셀 읽기/저장 API,
+  `/api/source` 소스 뷰어. 웹은 CodeMirror 편집기 + 출력(텍스트·이미지·에러) + 모두 실행/중단/재시작/저장. **`lab` 서비스 제거** (컨테이너 하나).
+- **교재 UI**: 챕터 목록(읽음 표시)·절 목차(스크롤 추적)·이전/다음·코드 경로 클릭 → 소스 패널·콜아웃. 실험 탭 run 겹쳐 그리기, 생성 탭 스트리밍.
+- **교재·노트북 보강**: 0~10장 전부에 읽기 전에·핵심 용어·손계산 단계별 예시·자바 개발자의 눈으로·흔한 오해·스스로 점검 절 추가.
+  노트북마다 "출력에서 볼 것"·"해 보기" 셀. 규칙은 `docs/writing-guide.md` "상세함의 기준".
+- **줄표 제거**: 저장소 전체 600여 건 (제목 `1장 …`, 절 `1.1 …: …`, 본문 쉼표·마침표). 규칙은 writing-guide "언어" 절 + 에이전트 메모리.
+- **사고**: 대기 스크립트의 `pgrep -f "docker compose build"` 가 자기 명령줄에 걸려 무한 대기 → 파일 마커·포트로 기다리는 규칙(CLAUDE.md 함정).
+- **mixed-cpu 결과**: 5,000 스텝 113분, val(혼합) 4.436 @5000 (끝까지 하강, 과적합 없음). 근대문학 val 글자당 **3.30 bit** (small-cpu 3.48). 위키식 프롬프트 이어쓰기 가능. 9장 표·8장 §5·7장 7.5 에 반영.
+- **검증**: `bash scripts/verify.sh` 통과 (ruff · pytest 61 · 노트북 11개 실행, 보강본). PDF v0.1.5 바탕화면 교체. 버전 0.1.5. 커밋 4묶음·푸시.
+- **메모**: 하네스가 "메모리 부족"으로 백그라운드 대기 작업을 3회 종료 (free 1.3GB, available 4.3GB). 긴 대기는 `Monitor` 로.
+
+## 2026-09-16: 4~10장 + 본 학습 + 대시보드(M6) 일괄 구현
 
 - **요청**: "4장부터 끝까지, todo 까지 다 구현. 장별로 테스트도." (한 번에)
 - **만든 것** (장별 교재·노트북·모듈·테스트 7종 세트):
-  - 4장 `autograd.py`(Value)·`numpy_lm.py`(손 역전파)·`mlp.py`(MLP LM)·`data.get_batch` — NumPy 바이그램 val 3.58(세기 3.10), MLP T=1 val 6.85 < 2-gram 7.67
-  - 5장 `attention.py` — 문맥 8: 어텐션 한 층 val 6.40 vs MLP 8.22
-  - 6장 `model.py`(GPTConfig·Block·GPT, weight tying) — 2층·C128 600스텝 val 6.1
-  - 7장 `train.py`(Trainer·스케줄·체크포인트·JSONL)·`scripts/train.py`·`configs/{tiny-notebook,small-cpu}.yaml` — **small-cpu 본 학습** 6.8M, 2,500스텝 (결과는 아래)
+  - 4장 `autograd.py`(Value)·`numpy_lm.py`(손 역전파)·`mlp.py`(MLP LM)·`data.get_batch`. NumPy 바이그램 val 3.58(세기 3.10), MLP T=1 val 6.85 < 2-gram 7.67
+  - 5장 `attention.py`, 문맥 8: 어텐션 한 층 val 6.40 vs MLP 8.22
+  - 6장 `model.py`(GPTConfig·Block·GPT, weight tying), 2층·C128 600스텝 val 6.1
+  - 7장 `train.py`(Trainer·스케줄·체크포인트·JSONL)·`scripts/train.py`·`configs/{tiny-notebook,small-cpu}.yaml`, **small-cpu 본 학습** 6.8M, 2,500스텝 (결과는 아래)
   - 8장 `generate.py`(temperature·top-k·top-p·반복 억제, 원본/조정 확률) · 9장 `eval.py`(perplexity·bits/char·scaling_experiment) · 10장 `sft.py`(작품 목록 질문-답 80개 SFT 시연, 환각 시연)
   - `data.WORKS` 를 작품 목록 SSOT 로 승격 (download_corpus 가 import)
   - **M6 대시보드**: `dashboard/api/main.py`(FastAPI: runs·log·attention·generate·tokenize) + `dashboard/web`(Vite·React·TS·Tailwind v4·Recharts, 화면 3개) + `dashboard/Dockerfile`·`docker-compose.yml`(8082, D 드라이브 :ro) + `DESIGN.md`(Linear 파생) + `docs/guides/{dashboard,training}.md`. Playwright 1360/400 뷰포트 확인.
@@ -34,22 +53,22 @@ domain: development
   - `omd install-skills` 가 `.claude/settings.json` 의 Remote Control 차단 키를 삭제 → 즉시 복원. CLAUDE.md 에 경고.
   - Dockerfile `COPY a b ./dir/` 는 b 디렉토리 **내용**을 푼다 → `dashboard.api` import 실패 → 경로 분리.
   - Playwright MCP 는 `pkill -f uvicorn` 문자열이 자기 명령줄에도 걸려 대기 작업이 죽음 → 이후 `pkill` 패턴 주의.
-  - DESIGN.md 는 `/omd:init` 의 hash-bound 패키지 대신 카탈로그에서 손으로 파생 (스킬은 새 세션에서만 로드됨) — todo P3.
-- **본 학습 결과 (small-cpu)**: 2,500 스텝 45분, best val **5.485** @2100 (train 4.77), 마지막 5.49 — 2,100 이후 정체(과적합 시작). perplexity 241, 글자당 3.48 bit (문자 3-gram 4.15). 생성문은 어절·대화 부호는 살아 있으나 문단 의미는 이어지지 않음 (v1.0 판정은 사용자, todo P1).
+  - DESIGN.md 는 `/omd:init` 의 hash-bound 패키지 대신 카탈로그에서 손으로 파생 (스킬은 새 세션에서만 로드됨), todo P3.
+- **본 학습 결과 (small-cpu)**: 2,500 스텝 45분, best val **5.485** @2100 (train 4.77), 마지막 5.49, 2,100 이후 정체(과적합 시작). perplexity 241, 글자당 3.48 bit (문자 3-gram 4.15). 생성문은 어절·대화 부호는 살아 있으나 문단 의미는 이어지지 않음 (v1.0 판정은 사용자, todo P1).
 - **검증**: `bash scripts/verify.sh` 통과 (ruff · pytest 58 · 노트북 정규화 · 노트북 11개 실행 ~30분). PDF v0.1.4(11장) 바탕화면 교체. 버전 0.1.4. 장별 커밋·푸시.
 - **다음**: 사용자 v1.0 판정 → 코퍼스 2차 확장 (todo P1).
 
-## 2026-09-16 — 사고: VS Code 에서 노트북이 열자마자 dirty (03)
+## 2026-09-16: 사고: VS Code 에서 노트북이 열자마자 dirty (03)
 
 - **피드백(채팅)**: "03 을 열면 변경사항이 자꾸 생겨 바로 닫기가 안 된다. 다른 노트북은 괜찮다."
 - **원인**: VS Code Jupyter 확장이 .venv 커널을 고르며 `metadata.kernelspec.display_name = "sh-llm-study (3.12.3)"` 과
   `metadata.language_info` 를 써 넣는데, nbformat 으로 생성한 노트북에는 이 값이 없어 열 때마다 변경이 생김. (사용자가 Ctrl+S 한 파일을
   HEAD 와 비교해 확인.) 03 만 문제였던 것은 에이전트가 같은 시간대에 03 을 여러 번 덮어써 dirty 버퍼가 남았기 때문으로 추정.
-- **수정**: `scripts/normalize_notebooks.py` — 표준 메타데이터·순번 셀 id·출력 제거를 제자리 적용, `--check` 를 `scripts/verify.sh` 에 추가
+- **수정**: `scripts/normalize_notebooks.py`, 표준 메타데이터·순번 셀 id·출력 제거를 제자리 적용, `--check` 를 `scripts/verify.sh` 에 추가
   (어긋나면 검증 실패). 노트북 4개 정규화. 노트북 빌더는 이후 이 스크립트를 마지막에 호출한다.
 - **규칙**: 사용자가 열어 둘 수 있는 노트북을 덮어쓰기 전에 한 줄 알린다 (에이전트 메모리에도 기록).
 
-## 2026-09-16 — M2 3장 임베딩
+## 2026-09-16: M2 3장 임베딩
 
 - **요청**: "Untitled.ipynb 삭제해도 되고, 다음 스텝으로" → 삭제 + `.gitignore` 에 `Untitled*.ipynb`.
 - **만든 것**: `src/shllm/embedding.py`(`TokenEmbedding`·`one_hot_lookup`·`sinusoidal_positions`·`LearnedPositionalEmbedding`·
@@ -61,7 +80,7 @@ domain: development
 - **검증**: `bash scripts/verify.sh` 통과, PDF 재빌드(v0.1.3), 커밋·푸시.
 - **다음**: M2 4장 신경망 기초.
 
-## 2026-09-16 — M1 2장 BPE 토크나이저 + 교재 PDF 빌드 + 공개 저장소
+## 2026-09-16: M1 2장 BPE 토크나이저 + 교재 PDF 빌드 + 공개 저장소
 
 - **요청**: "다음 스텝 진행, build_book.py 만들어 바탕화면에 복사·갱신 시 이전 PDF 교체, GitHub public 생성·푸시" + 질문 "만들면 대화가 되나?" (→ 채팅으로 답: base 모델은 이어쓰기만, 대화는 SFT 필요. todo P2 에 10장 스코프 항목).
 - **만든 것**: `scripts/build_book.py`(weasyprint, `build/book/sh-llm-study-book-v<버전>.pdf` → 바탕화면 이전 판 삭제 후 복사),
@@ -74,7 +93,7 @@ domain: development
 - **검증**: `bash scripts/verify.sh` 통과, PDF 재빌드·바탕화면 교체, 커밋·푸시.
 - **다음**: M2 3장 임베딩.
 
-## 2026-09-16 — M1 1장: 문자 토크나이저 + 바이그램/n-gram
+## 2026-09-16: M1 1장: 문자 토크나이저 + 바이그램/n-gram
 
 - **요청**: "진행해줘" (1장 착수). Docker Desktop 실행 확인 요청 → `docker` 29.7 동작 확인, todo P2/plan 항목 해소.
 - **만든 것**: `src/shllm/bigram.py`(`BigramModel` (V,V) 텐서 + `NGramModel` dict 보간), `tests/test_bigram.py`(6개),
@@ -85,10 +104,10 @@ domain: development
   문맥 분포로 **보간**(재귀). 결과 val loss: 균등 7.95 / bigram 3.17 / 3-gram 2.88(최소) / 5-gram 3.50(과적합).
 - **검증**: `bash scripts/verify.sh` 통과 (ruff · pytest 10 passed · 노트북 00·01 실행). 로컬 커밋 완료.
 - **푸시 보류**: git 원격이 없고 GitHub 에 `coolmarvel/sh-llm-study` 도 없음. 저장소 생성(공개/비공개)은 사용자 결정 → 생성 후 `git remote add origin … && git push -u origin main`.
-- **미처리**: 루트 `Untitled.ipynb`(빈 노트북, Jupyter 가 만든 것으로 추정) 은 건드리지 않음 — 사용자 확인 필요.
+- **미처리**: 루트 `Untitled.ipynb`(빈 노트북, Jupyter 가 만든 것으로 추정) 은 건드리지 않음. 사용자 확인 필요.
 - **다음**: M1 2장 BPE 토크나이저 (`BPETokenizer`, `data/tokenizers/` 저장 규약).
 
-## 2026-09-16 — 킥오프 완료
+## 2026-09-16: 킥오프 완료
 
 - **요청**: "나만의 LLM 을 만들어보고 싶다. 개념부터 배우고 구현하고 싶다." (project-seed 메뉴 위저드)
 - **결정**: 이름 `sh-llm-study`. 범위 = 개념 학습 + 밑바닥부터 소형 한글 GPT (CPU 전용). 스택 Python 3.12 + PyTorch CPU

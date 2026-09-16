@@ -4,7 +4,7 @@
     uv run python scripts/build_book.py --no-copy  # 굽기만
 
 산출물 이름: sh-llm-study-book-v<버전>.pdf (버전 = shllm.__version__). 바탕화면의 같은 접두어 PDF 는
-새 판으로 교체된다 (이전 판 삭제) — 항상 최신 한 권만 남긴다.
+새 판으로 교체된다 (이전 판 삭제), 항상 최신 한 권만 남긴다.
 전달 위치는 환경변수 SHLLM_BOOK_DEST 로 바꿀 수 있다 (기본 /mnt/c/Users/user/Desktop).
 """
 
@@ -83,7 +83,7 @@ def render_chapter(path: Path) -> tuple[str, str]:
 def build(chapters: list[Path]) -> Path:
     parts = [
         '<div class="cover"><h1>sh-llm-study</h1>'
-        "<p>자바 개발자가 밑바닥부터 만드는 소형 한글 GPT — 교재</p>"
+        "<p>자바 개발자가 밑바닥부터 만드는 소형 한글 GPT, 교재</p>"
         f"<p>v{__version__} · {date.today().isoformat()}</p></div>",
         '<div class="toc"><h1>차례</h1><ul>',
     ]

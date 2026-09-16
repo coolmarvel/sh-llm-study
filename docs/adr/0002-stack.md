@@ -12,7 +12,7 @@ Accepted (킥오프 위저드에서 사용자가 직접 선택, 2026-09-16)
 
 ## 맥락
 
-`docs/brief.md` — CPU 만 있는 WSL PC 에서, LLM 개념을 챕터별로 배우며 소형 한글 GPT 를 밑바닥부터
+`docs/brief.md`. CPU 만 있는 WSL PC 에서, LLM 개념을 챕터별로 배우며 소형 한글 GPT 를 밑바닥부터
 구현한다. 산출물은 ① 챕터별 노트북 + 패키지 코드 ② 마크다운 교재(→PDF) ③ 웹 대시보드 세 가지.
 학습자는 자바 배경이며 Python·PyTorch 는 처음이다.
 
@@ -23,12 +23,12 @@ Accepted (킥오프 위저드에서 사용자가 직접 선택, 2026-09-16)
 | 모델 언어·프레임워크 | **Python 3.12 + PyTorch (CPU 빌드)** | NumPy 순수 구현 / Java 순수 구현 |
 | 패키지 관리 | **uv** (`pyproject.toml` + `uv.lock`) | pip + venv |
 | 실습 형태 | **Jupyter 노트북(챕터별) + `src/shllm/` 패키지** | 스크립트만 |
-| 교재 | **`docs/book/` 마크다운 → PDF 한 권**(바탕화면 전달) | — |
+| 교재 | **`docs/book/` 마크다운 → PDF 한 권**(바탕화면 전달) |, |
 | 대시보드 | **FastAPI + React(Vite·TypeScript) + Tailwind**, 도커로 8082 포트 | FastAPI+HTMX / Gradio |
-| 저장 | **파일만** — `data/` → `/mnt/d/sh-llm-data` 심볼릭 링크 (corpus·tokenizers·checkpoints·runs), 학습 로그 JSONL | 파일 + SQLite |
+| 저장 | **파일만**, `data/` → `/mnt/d/sh-llm-data` 심볼릭 링크 (corpus·tokenizers·checkpoints·runs), 학습 로그 JSONL | 파일 + SQLite |
 | 코퍼스 | **한글 공개 텍스트** (퍼블릭 도메인 문학 → 한국어 위키 일부로 확장) | 영어 Tiny Shakespeare / 둘 다 |
 | 디자인 | **oh-my-design, 베이스 레퍼런스 Linear, 차용 없음** | Toss / AWS / Naver |
-| 하드웨어 | CPU 16코어, RAM 7.6GB, GPU 없음 | — |
+| 하드웨어 | CPU 16코어, RAM 7.6GB, GPU 없음 |, |
 
 ## 근거
 

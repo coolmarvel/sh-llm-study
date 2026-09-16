@@ -4,7 +4,7 @@
     uv run python scripts/normalize_notebooks.py --check   # 어긋난 파일이 있으면 exit 1 (verify.sh 가 호출)
 
 표준: kernelspec 은 VS Code Jupyter 확장이 .venv 커널을 고를 때 쓰는 값과 같게, language_info 포함,
-셀 id 는 순번("0","1",…) — git 의 nbstripout 필터가 커밋본에 쓰는 것과 같은 규칙, 출력·실행 번호 없음.
+셀 id 는 순번("0","1",…), git 의 nbstripout 필터가 커밋본에 쓰는 것과 같은 규칙, 출력·실행 번호 없음.
 근거: 2026-09-16 VS Code 에서 03 노트북이 열 때마다 dirty 가 되던 사고 (docs/session-log.md).
 """
 

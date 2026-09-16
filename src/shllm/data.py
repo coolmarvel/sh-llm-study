@@ -38,7 +38,7 @@ WORKS: list[tuple[str, str, str]] = [
 
 
 def list_corpus_files(corpus_dir: Path = CORPUS_DIR) -> list[Path]:
-    """합본 파일 목록 (works/ 하위는 포함하지 않는다 — 합본과 중복이므로)."""
+    """합본 파일 목록 (works/ 하위는 포함하지 않는다, 합본과 중복이므로)."""
     return sorted(corpus_dir.glob("*.txt"))
 
 
@@ -62,7 +62,7 @@ def get_batch(
 ) -> tuple[torch.Tensor, torch.Tensor]:
     """토큰 열에서 무작위 위치 batch_size 곳을 골라 (x, y) 를 만든다.
 
-    x[i] = data[s : s+T],  y[i] = data[s+1 : s+T+1]  — y 는 x 를 한 칸 민 것. 자리마다 "다음 토큰" 이 정답.
+    x[i] = data[s : s+T],  y[i] = data[s+1 : s+T+1], y 는 x 를 한 칸 민 것. 자리마다 "다음 토큰" 이 정답.
     반환 shape: x (B, T), y (B, T). 4장 MLP 는 y 의 마지막 열만 쓰고, 6장 GPT 는 T 개 자리를 한 번에 학습한다.
     """
     starts = torch.randint(0, len(data) - block_size - 1, (batch_size,), generator=generator)

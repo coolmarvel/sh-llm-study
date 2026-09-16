@@ -1,4 +1,4 @@
-# v1.0 기본 학습 — scripts/train.py --config configs/small-cpu.yaml (CPU 약 2~3시간, 8 스레드 기준 스텝당 ~3초)
+# v1.0 기본 학습, scripts/train.py --config configs/small-cpu.yaml (CPU 약 2~3시간, 8 스레드 기준 스텝당 ~3초)
 # 파라미터 ≈ 토큰 임베딩 8192×256 (2.1M, lm_head 와 공유) + 6층 × 12·256² (4.7M) ≈ 6.8M
 # 코퍼스가 49만 토큰뿐이라 2,500 스텝(≈ 1,000만 토큰, 20 에폭)이면 과적합이 시작된다 → dropout 0.2, best.pt 는 val 최저 시점
 model:

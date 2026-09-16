@@ -1,6 +1,6 @@
-"""MLP 언어모델 (4장) — Bengio et al. 2003. 어텐션 이전, 신경망으로 "다음 토큰 확률" 을 만든 첫 모델.
+"""MLP 언어모델 (4장). Bengio et al. 2003. 어텐션 이전, 신경망으로 "다음 토큰 확률" 을 만든 첫 모델.
 
-    NeuralBigram      W (V, V) 하나. numpy_lm 의 PyTorch 판 — 1장의 확률표를 학습으로 얻는다
+    NeuralBigram      W (V, V) 하나. numpy_lm 의 PyTorch 판, 1장의 확률표를 학습으로 얻는다
     MLPLanguageModel  직전 block_size 개 토큰을 임베딩해 이어 붙이고 → 은닉층(tanh) → 어휘 점수
                       1장 n-gram 과 달리 문맥이 dict 키가 아니라 벡터라, 비슷한 문맥끼리 정보를 공유한다
 
@@ -15,7 +15,7 @@ import torch.nn.functional as F
 
 
 class NeuralBigram(nn.Module):
-    """logits = table[현재 토큰]. 파라미터 V×V — 세어서 만든 1장의 표를 경사하강으로 찾는다."""
+    """logits = table[현재 토큰]. 파라미터 V×V, 세어서 만든 1장의 표를 경사하강으로 찾는다."""
 
     def __init__(self, vocab_size: int) -> None:
         super().__init__()
@@ -50,7 +50,7 @@ class MLPLanguageModel(nn.Module):
         # idx: (B, T) 이고 T == block_size. 마지막 자리 하나의 다음 토큰만 예측한다
         B, T = idx.shape
         x = self.emb(idx)  # (B, T, C)
-        x = x.view(B, T * self.emb.embedding_dim)  # (B, T·C) — 문맥 벡터들을 한 줄로 이어 붙인다
+        x = x.view(B, T * self.emb.embedding_dim)  # (B, T·C), 문맥 벡터들을 한 줄로 이어 붙인다
         h = torch.tanh(self.hidden(x))  # (B, H)
         logits = self.out(h)  # (B, V)
         loss = None if targets is None else F.cross_entropy(logits, targets)

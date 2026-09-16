@@ -1,7 +1,7 @@
-"""지시 파인튜닝 미니 시연 (10장) — base 모델을 "질문 → 답" 형식으로 추가 학습한다.
+"""지시 파인튜닝 미니 시연 (10장), base 모델을 "질문 → 답" 형식으로 추가 학습한다.
 
 8장 모델은 이어 쓰기만 한다. 대화형 모델은 같은 모델에 **형식이 있는 데이터**를 조금 더 학습시킨 것이다(SFT,
-supervised fine-tuning). 여기서는 코퍼스의 작품 목록(작가·제목)으로 질문-답 쌍을 만들어 시연한다 — 진짜 대화
+supervised fine-tuning). 여기서는 코퍼스의 작품 목록(작가·제목)으로 질문-답 쌍을 만들어 시연한다, 진짜 대화
 데이터는 없지만, "형식을 배운다" 는 것이 무엇인지와 그 한계(모르는 것도 그럴듯하게 답함 = 환각)를 보기엔 충분하다.
 
     PROMPT / ANSWER   형식 토큰. 모델이 "여기부터 답" 을 알아보게 하는 약속
@@ -45,7 +45,7 @@ def build_examples(works: list[tuple[str, str]]) -> list[str]:
 
 
 def _encode_example(tok, text: str) -> tuple[list[int], list[int]]:
-    """토큰 ids 와 마스크(답 부분 = 1). 질문 부분에는 loss 를 주지 않는다 — 질문을 외우는 게 목적이 아니다."""
+    """토큰 ids 와 마스크(답 부분 = 1). 질문 부분에는 loss 를 주지 않는다, 질문을 외우는 게 목적이 아니다."""
     q_end = text.index(ANSWER) + len(ANSWER)
     q_ids = tok.encode(text[:q_end])
     a_ids = tok.encode(text[q_end:])

@@ -79,7 +79,7 @@ def test_unigram_equals_frequency():
 
 
 def test_ngram_longer_context_fits_better():
-    # "나" 다음은 "다" 또는 "마" — 직전 글자만 보면 반반이지만, 두 글자를 보면("가나"/"라나") 확정된다
+    # "나" 다음은 "다" 또는 "마", 직전 글자만 보면 반반이지만, 두 글자를 보면("가나"/"라나") 확정된다
     text = "가나다라나마" * 10
     tok = CharTokenizer.from_text(text)
     ids = tok.encode(text)

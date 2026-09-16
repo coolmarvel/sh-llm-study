@@ -1,10 +1,10 @@
-"""NumPy 로 손으로 쓴 신경 바이그램 (4장) — autograd 없이 순전파와 역전파를 직접 계산한다.
+"""NumPy 로 손으로 쓴 신경 바이그램 (4장), autograd 없이 순전파와 역전파를 직접 계산한다.
 
 모델: logits = W[x]  (W: (V, V), x 의 행이 "다음 토큰 점수" 벡터)
       p = softmax(logits),  loss = -mean(log p[정답])
 
 1장의 확률표를 "세어서" 만든 것과 달리, 여기서는 랜덤 W 에서 출발해 loss 의 기울기 방향으로 W 를 조금씩
-고친다. 충분히 돌리면 1장의 표와 같은 곳에 도착한다 — 학습이란 세는 것의 일반화다.
+고친다. 충분히 돌리면 1장의 표와 같은 곳에 도착한다, 학습이란 세는 것의 일반화다.
 
 역전파의 핵심 한 줄: softmax + cross-entropy 를 합치면  d loss / d logits = (p - onehot(y)) / N.
 """
@@ -23,7 +23,7 @@ def softmax(logits: np.ndarray) -> np.ndarray:
 
 def forward(W: np.ndarray, x: np.ndarray, y: np.ndarray) -> tuple[float, np.ndarray]:
     """loss 와 확률 p 를 돌려준다. x, y: (N,) 정수. W: (V, V)."""
-    logits = W[x]  # (N, V)  — 룩업 = 원-핫 × W (3장)
+    logits = W[x]  # (N, V), 룩업 = 원-핫 × W (3장)
     p = softmax(logits)  # (N, V)
     loss = -np.log(
         p[np.arange(len(y)), y]
@@ -32,7 +32,7 @@ def forward(W: np.ndarray, x: np.ndarray, y: np.ndarray) -> tuple[float, np.ndar
 
 
 def backward(p: np.ndarray, x: np.ndarray, y: np.ndarray, vocab_size: int) -> np.ndarray:
-    """d loss / d W. 룩업의 역전파는 "해당 행에 기울기를 더하기" 다 (np.add.at — 같은 행이 여러 번 나오면 누적)."""
+    """d loss / d W. 룩업의 역전파는 "해당 행에 기울기를 더하기" 다 (np.add.at, 같은 행이 여러 번 나오면 누적)."""
     n = len(y)
     dlogits = p.copy()  # (N, V)
     dlogits[np.arange(n), y] -= 1.0  # p - onehot(y)

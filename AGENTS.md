@@ -1,4 +1,4 @@
-# AGENTS.md — sh-llm-study
+# AGENTS.md: sh-llm-study
 
 이 파일은 **모든 AI 코딩 에이전트**(Claude Code, Codex, Cursor, Copilot 등)를 위한 진입점이다.
 도구에 상관없이 아래 규칙을 따른다. Claude Code 전용 상세(부팅 프로토콜·하네스)는 `CLAUDE.md`.
@@ -23,10 +23,10 @@ LLM 개념을 10개 장으로 배우며 CPU 만으로 소형 한글 GPT 를 밑�
 
 ## 커밋 컨벤션
 
-Conventional Commits — `<type>: <한국어 제목>` + 리스트형 본문 + `Co-Authored-By` 트레일러.
+Conventional Commits, `<type>: <한국어 제목>` + 리스트형 본문 + `Co-Authored-By` 트레일러.
 type: feat, fix, refactor, chore, docs, style, test, perf, ci, build, revert, init, remove, rename, hotfix.
 
 ## 더 읽을 것
 
-- `CLAUDE.md` — 부팅 프로토콜, 변경 후 자동 규칙, 코드 지도, 하네스 상세
-- `docs/brief.md` — 왜/무엇 SSOT · `docs/writing-guide.md` — 문서 규칙
+- `CLAUDE.md`, 부팅 프로토콜, 변경 후 자동 규칙, 코드 지도, 하네스 상세
+- `docs/brief.md`, 왜/무엇 SSOT · `docs/writing-guide.md`, 문서 규칙

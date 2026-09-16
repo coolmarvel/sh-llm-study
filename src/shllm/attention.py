@@ -1,11 +1,11 @@
-"""셀프 어텐션 (5장) — "문맥의 어디를 볼지" 를 내용으로 정한다.
+"""셀프 어텐션 (5장). "문맥의 어디를 볼지" 를 내용으로 정한다.
 
-    attention(q, k, v, mask)   공식 그 자체: softmax(Q Kᵀ / √d) V — 루프 없는 텐서 식
+    attention(q, k, v, mask)   공식 그 자체: softmax(Q Kᵀ / √d) V, 루프 없는 텐서 식
     AttentionHead              헤드 하나: 입력 (B, T, C) → Q, K, V 를 만들어 attention 을 적용 → (B, T, head_size)
     CausalSelfAttention        여러 헤드를 한 번에(행렬 하나로 Q·K·V 를 뽑아 헤드 축으로 쪼갬) + 출력 투영. 6장 GPT 가 쓰는 판
 
 "causal"(인과) 마스크: 자리 t 는 t 이하만 본다. 미래 토큰을 보면 "다음 토큰 예측" 이 컨닝이 되기 때문이다.
-어텐션은 위치를 모른다 — 순서 정보는 3장 위치 임베딩이 입력에 이미 더해져 있다.
+어텐션은 위치를 모른다, 순서 정보는 3장 위치 임베딩이 입력에 이미 더해져 있다.
 """
 
 from __future__ import annotations
@@ -22,11 +22,11 @@ def attention(
 ) -> tuple[torch.Tensor, torch.Tensor]:
     """q, k, v: (..., T, d). 돌려주는 것: (출력 (..., T, d), 어텐션 가중치 (..., T, T)).
 
-    1. scores[i, j] = q_i · k_j / √d   — "자리 i 가 자리 j 를 얼마나 볼까" 의 원점수. √d 로 나누는 이유:
+    1. scores[i, j] = q_i · k_j / √d. "자리 i 가 자리 j 를 얼마나 볼까" 의 원점수. √d 로 나누는 이유:
        d 가 크면 내적의 분산이 d 에 비례해 커져 softmax 가 한 곳에 몰린다(기울기 소실).
     2. mask 가 False 인 칸은 -inf → softmax 후 0 (못 본다)
-    3. weights = softmax(scores)       — 행마다 합이 1 인 "시선 배분"
-    4. out_i = Σ_j weights[i, j] · v_j  — 본 만큼 값을 섞는다
+    3. weights = softmax(scores), 행마다 합이 1 인 "시선 배분"
+    4. out_i = Σ_j weights[i, j] · v_j, 본 만큼 값을 섞는다
     """
     d = q.size(-1)
     scores = q @ k.transpose(-2, -1) / math.sqrt(d)  # (..., T, T)
@@ -37,7 +37,7 @@ def attention(
 
 
 def causal_mask(T: int) -> torch.Tensor:
-    """(T, T) 하삼각 True. mask[i, j] = (j <= i) — 자리 i 는 자기 자신과 과거만 본다."""
+    """(T, T) 하삼각 True. mask[i, j] = (j <= i), 자리 i 는 자기 자신과 과거만 본다."""
     return torch.tril(torch.ones(T, T, dtype=torch.bool))
 
 

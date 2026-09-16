@@ -1,8 +1,8 @@
-"""임베딩 (3장) — 정수 토큰 id 를 신경망이 다룰 수 있는 벡터로.
+"""임베딩 (3장), 정수 토큰 id 를 신경망이 다룰 수 있는 벡터로.
 
 TokenEmbedding              (V, C) 룩업 테이블. 원-핫 벡터 × 행렬과 같지만 행을 바로 꺼낸다
 sinusoidal_positions        학습하지 않는 위치 벡터 (원조 Transformer 방식)
-LearnedPositionalEmbedding  학습하는 위치 벡터 (GPT-2 방식) — (T_max, C)
+LearnedPositionalEmbedding  학습하는 위치 벡터 (GPT-2 방식), (T_max, C)
 GPTEmbedding                토큰 임베딩 + 위치 임베딩 → (B, T, C). 6장 GPT 의 입구
 
 cooccurrence_matrix · ppmi · svd_embeddings · nearest
@@ -39,7 +39,7 @@ def one_hot_lookup(idx: torch.Tensor, weight: torch.Tensor) -> torch.Tensor:
 
 
 def sinusoidal_positions(n_positions: int, n_embd: int) -> torch.Tensor:
-    """(T, C) 위치 벡터. 열마다 주기가 다른 sin/cos — 짧은 주기는 이웃 위치를, 긴 주기는 먼 위치를 구분한다."""
+    """(T, C) 위치 벡터. 열마다 주기가 다른 sin/cos, 짧은 주기는 이웃 위치를, 긴 주기는 먼 위치를 구분한다."""
     pos = torch.arange(n_positions, dtype=torch.float32)[:, None]  # (T, 1)
     i = torch.arange(0, n_embd, 2, dtype=torch.float32)  # (C/2,) 짝수 열 번호
     freq = torch.exp(
@@ -72,7 +72,7 @@ class GPTEmbedding(nn.Module):
     """GPT 의 입구: x = 토큰 임베딩 + 위치 임베딩.
 
     같은 토큰이라도 몇 번째 자리에 있느냐에 따라 다른 벡터가 되게 한다. 더하기(연결이 아니라)로 합쳐도
-    C 차원이 충분히 크면 두 정보가 섞이지 않고 공존한다 — 6장에서 이 벡터가 Transformer 블록으로 들어간다.
+    C 차원이 충분히 크면 두 정보가 섞이지 않고 공존한다, 6장에서 이 벡터가 Transformer 블록으로 들어간다.
     """
 
     def __init__(self, vocab_size: int, block_size: int, n_embd: int) -> None:
@@ -83,7 +83,7 @@ class GPTEmbedding(nn.Module):
     def forward(self, idx: torch.Tensor) -> torch.Tensor:
         B, T = idx.shape
         tok = self.tok(idx)  # (B, T, C)
-        pos = self.pos(T)  # (T, C) — 배치마다 같으니 B 축 없이 두고 브로드캐스팅으로 더한다
+        pos = self.pos(T)  # (T, C), 배치마다 같으니 B 축 없이 두고 브로드캐스팅으로 더한다
         return tok + pos  # (B, T, C)
 
 
@@ -103,7 +103,7 @@ def cooccurrence_matrix(ids: torch.Tensor, vocab_size: int, window: int = 2) -> 
 
 
 def ppmi(counts: torch.Tensor) -> torch.Tensor:
-    """양의 점별 상호정보량. PMI(a,b) = log P(a,b) / (P(a) P(b)) — "우연보다 얼마나 더 자주 같이 나오나".
+    """양의 점별 상호정보량. PMI(a,b) = log P(a,b) / (P(a) P(b)). "우연보다 얼마나 더 자주 같이 나오나".
 
     횟수를 그대로 쓰면 '는'·',' 같은 흔한 토큰이 모든 행을 지배한다. PMI 는 각 토큰의 빈도로 나눠 그 영향을 뺀다.
     음수(우연보다 덜 같이 나옴)는 정보가 불안정해 0 으로 자른다 (Positive PMI).
@@ -118,7 +118,7 @@ def ppmi(counts: torch.Tensor) -> torch.Tensor:
 
 
 def svd_embeddings(matrix: torch.Tensor, n_embd: int) -> torch.Tensor:
-    """(V, V) 행렬을 SVD 로 (V, C) 벡터로 압축. 행렬 ≈ E @ E'ᵀ 가 되게 하는 E — 상위 C 개 방향만 남긴다."""
+    """(V, V) 행렬을 SVD 로 (V, C) 벡터로 압축. 행렬 ≈ E @ E'ᵀ 가 되게 하는 E, 상위 C 개 방향만 남긴다."""
     U, S, _ = torch.svd_lowrank(matrix, q=n_embd, niter=4)  # 전체 SVD 보다 훨씬 빠른 근사
     return U * S.sqrt()  # (V, C)
 

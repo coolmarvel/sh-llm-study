@@ -2,7 +2,7 @@
 
     GPTConfig   모델 크기를 정하는 숫자들 (어휘·문맥·층·헤드·폭·드롭아웃)
     MLP         위치별 2층 신경망 (C → 4C → C). 어텐션이 "모은" 정보를 자리마다 가공한다
-    Block       x = x + attn(ln1(x));  x = x + mlp(ln2(x))   — 잔차(residual) + Pre-LayerNorm
+    Block       x = x + attn(ln1(x));  x = x + mlp(ln2(x)), 잔차(residual) + Pre-LayerNorm
     GPT         임베딩(3장) → Block × n_layer → LayerNorm → 어휘 점수. forward(idx, targets) → (logits, loss)
 
 파라미터 수 대부분은 (a) 토큰 임베딩 V·C 와 (b) 블록당 12·C² (어텐션 4C² + MLP 8C²) 에 있다.
@@ -31,7 +31,7 @@ class GPTConfig:
 
 
 class MLP(nn.Module):
-    """자리마다 독립으로 적용되는 2층 신경망. 4장 MLP 와 같은 모양이지만 문맥을 이어 붙이지 않는다 — 문맥은 어텐션이 이미 섞었다."""
+    """자리마다 독립으로 적용되는 2층 신경망. 4장 MLP 와 같은 모양이지만 문맥을 이어 붙이지 않는다, 문맥은 어텐션이 이미 섞었다."""
 
     def __init__(self, n_embd: int, dropout: float) -> None:
         super().__init__()
@@ -85,7 +85,7 @@ class GPT(nn.Module):
                 nn.init.zeros_(module.bias)
 
     def n_params(self, non_embedding: bool = True) -> int:
-        """파라미터 수. non_embedding=True 면 위치 임베딩을 뺀다 (토큰 임베딩은 lm_head 와 묶여 있어 그대로 센다 — GPT-2 관례)."""
+        """파라미터 수. non_embedding=True 면 위치 임베딩을 뺀다 (토큰 임베딩은 lm_head 와 묶여 있어 그대로 센다. GPT-2 관례)."""
         n = sum(p.numel() for p in self.parameters())
         if non_embedding:
             n -= self.embed.pos.weight.numel()
@@ -101,12 +101,12 @@ class GPT(nn.Module):
         for block in self.blocks:
             x = block(x)  # (B, T, C) 유지
         x = self.ln_f(x)
-        logits = self.lm_head(x)  # (B, T, V) — 모든 자리에서 다음 토큰 점수를 한 번에
+        logits = self.lm_head(x)  # (B, T, V), 모든 자리에서 다음 토큰 점수를 한 번에
         loss = None
         if targets is not None:
             loss = F.cross_entropy(logits.view(-1, logits.size(-1)), targets.view(-1))
         return logits, loss
 
     def attention_maps(self) -> list[torch.Tensor]:
-        """마지막 forward 의 층별 어텐션 가중치 [(B, n_head, T, T), ...] — 시각화·대시보드용."""
+        """마지막 forward 의 층별 어텐션 가중치 [(B, n_head, T, T), ...], 시각화·대시보드용."""
         return [b.attn.last_weights for b in self.blocks]
