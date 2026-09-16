@@ -1,0 +1,19 @@
+# 7장 노트북용 "짧은 학습" — 노트북 셀 10분 안에 끝나는 크기. 원리 확인용, 결과물 품질은 기대하지 않는다
+model:
+  vocab_size: 8192
+  block_size: 64
+  n_layer: 2
+  n_head: 4
+  n_embd: 128
+  dropout: 0.0
+train:
+  run_name: tiny-notebook
+  batch_size: 32
+  max_steps: 600
+  lr: 1.0e-3
+  min_lr: 1.0e-4
+  warmup_steps: 50
+  eval_every: 100
+  eval_batches: 10
+  ckpt_every: 300
+  tokenizer: bpe-8192.json

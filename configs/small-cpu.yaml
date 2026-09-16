@@ -1,0 +1,23 @@
+# v1.0 기본 학습 — scripts/train.py --config configs/small-cpu.yaml (CPU 약 2~3시간, 8 스레드 기준 스텝당 ~3초)
+# 파라미터 ≈ 토큰 임베딩 8192×256 (2.1M, lm_head 와 공유) + 6층 × 12·256² (4.7M) ≈ 6.8M
+# 코퍼스가 49만 토큰뿐이라 2,500 스텝(≈ 1,000만 토큰, 20 에폭)이면 과적합이 시작된다 → dropout 0.2, best.pt 는 val 최저 시점
+model:
+  vocab_size: 8192
+  block_size: 128
+  n_layer: 6
+  n_head: 8
+  n_embd: 256
+  dropout: 0.2
+train:
+  run_name: small-cpu
+  batch_size: 32
+  max_steps: 2500
+  lr: 6.0e-4
+  min_lr: 6.0e-5
+  warmup_steps: 100
+  weight_decay: 0.1
+  grad_clip: 1.0
+  eval_every: 100
+  eval_batches: 8
+  ckpt_every: 100
+  tokenizer: bpe-8192.json
