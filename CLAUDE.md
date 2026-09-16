@@ -23,7 +23,9 @@
 2. 검증을 통과하기 전에는 커밋 메시지 작성/산출물 전달을 하지 않는다:
    `bash scripts/verify.sh` (ruff format --check · ruff check · pytest · `notebooks/*.ipynb` 전체 실행)
 3. 버전을 판단해 올린다 (아래 "버전 정책").
-4. 산출물 전달: 챕터 = 교재(`docs/book/`)+노트북+`src/shllm/` 모듈이 verify 통과한 상태. 교재 PDF 는 `/mnt/c/Users/user/Desktop/` 에 복사.
+4. 산출물 전달: 챕터 = 교재(`docs/book/`)+노트북+`src/shllm/` 모듈이 verify 통과한 상태.
+   **`docs/book/` 이 바뀌면 같은 턴에 `uv run python scripts/build_book.py`** — 바탕화면(`/mnt/c/Users/user/Desktop/`)의
+   이전 판 `sh-llm-study-book-*.pdf` 를 지우고 새 판을 복사한다 (항상 최신 한 권만, 사용자 지시 2026-09-16).
    학습된 모델 = `data/checkpoints/<run>/` (D 드라이브, 탐색기로 확인 가능). 대시보드 = 도커 8082 포트에서 사용자와 함께 확인.
 
 ## 버전 정책 (semver `MAJOR.MINOR.PATCH`)
@@ -37,7 +39,7 @@
 ## 커밋 컨벤션
 
 Conventional Commits — `<type>: <한국어 제목>` + 리스트형 본문. **검증(verify.sh) 통과 후 에이전트가 직접 커밋·푸시한다**
-(사용자 위임, 2026-09-16). 저자는 `coolmarvel <marvel97@naver.com>`. 메시지 끝에 `Co-Authored-By` 트레일러.
+(사용자 위임, 2026-09-16). 원격: `github.com/coolmarvel/sh-llm-study` (public). 저자는 `coolmarvel <marvel97@naver.com>`. 메시지 끝에 `Co-Authored-By` 트레일러.
 
 type: `feat` `fix` `refactor` `chore` `docs` `style` `test` `perf` `ci` `build` `revert` `init` `remove` `rename` `hotfix`
 
@@ -72,7 +74,7 @@ LLM 을 처음 배우는 자바 배경 개발자(제작자 본인)가, **개념�
 | `docs/adr/*.md` | 구조적 결정 기록 — 왜 이렇게 했는가 (`NNNN-kebab.md`) |
 | `docs/plans/*.md` | 앞으로 만들 것 — 기능 단위 구현 계획 (역할 구분은 `plans/README.md`) |
 | `docs/guides/*.md` | 현재 구현된 동작·코드 위치 (기능별) |
-| `docs/book/NN-*.md` | **교재** — 장별 개념 설명. 노트북과 1:1. M5 에서 PDF 로 묶음 |
+| `docs/book/NN-*.md` | **교재** — 장별 개념 설명. 노트북과 1:1. `scripts/build_book.py` 가 PDF 로 묶음 |
 | `docs/feedback-archive/` | 처리 완료한 사용자 피드백 보관소 |
 
 ## 자주 쓰는 명령
@@ -85,7 +87,7 @@ uv run pytest                                  # 단위 테스트
 uv run ruff format . && uv run ruff check .    # 포맷·린트 (Write/Edit 훅이 .py 는 자동 포맷)
 bash scripts/verify.sh                         # 검증 전체 (커밋 전 필수)
 # 긴 학습(7장 이후): uv run python scripts/train.py --config configs/<이름>.yaml
-# 교재 PDF(M5):     uv run python scripts/build_book.py
+# 교재 PDF:         uv run python scripts/build_book.py   # build/book/ + 바탕화면 교체 (--no-copy 로 굽기만)
 # 대시보드(M6):     docker compose up  → http://localhost:8082
 ```
 
@@ -102,12 +104,12 @@ bash scripts/verify.sh                         # 검증 전체 (커밋 전 필�
 | `notebooks/NN-*.ipynb` | 장별 실습. 검증된 코드는 반드시 `src/shllm/` 로 옮기고 노트북은 import 해서 쓴다 |
 | `docs/book/NN-*.md` | 장별 교재. 노트북과 번호·제목이 1:1 |
 | `tests/test_*.py` | 모듈별 단위 테스트 (round-trip, shape, 작은 학습이 손실을 줄이는지) |
-| `scripts/` | `download_corpus.py`(코퍼스) · `verify.sh`(검증) · `hooks/`(하네스) · 이후 `train.py`·`build_book.py` |
+| `scripts/` | `download_corpus.py`(코퍼스) · `verify.sh`(검증) · `build_book.py`(교재 PDF) · `hooks/`(하네스) · 이후 `train.py` |
 | `configs/` | 학습 설정 YAML (7장 이후) |
 | `data/` → `/mnt/d/sh-llm-data` | corpus/ tokenizers/ checkpoints/ runs/ — git 에 안 들어감 |
 
 **새 장 추가 = ① `docs/book/NN-제목.md` ② `notebooks/NN-제목.ipynb` ③ `src/shllm/모듈.py` ④ `tests/test_모듈.py`
-⑤ `docs/plans/0001-mvp.md` 체크 ⑥ `bash scripts/verify.sh`** — 여섯 개가 다 있어야 한 장이 끝난 것이다.
+⑤ `docs/plans/0001-mvp.md` 체크 ⑥ `bash scripts/verify.sh` ⑦ `uv run python scripts/build_book.py`(PDF 교체)** — 일곱 개가 다 있어야 한 장이 끝난 것이다.
 
 함정:
 - 코퍼스 합본(`korean-classics.txt`)과 `works/*.txt` 를 같이 읽으면 데이터가 2배로 중복된다 → `load_corpus("korean-classics")` 만 학습에 쓴다.
