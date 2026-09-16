@@ -12,6 +12,16 @@ domain: development
 
 블록 형식: `## YYYY-MM-DD — 제목` 아래에 **요청/피드백 → 수정 → 검증 → 다음** 순서로 간결하게.
 
+## 2026-09-16 — 사고: VS Code 에서 노트북이 열자마자 dirty (03)
+
+- **피드백(채팅)**: "03 을 열면 변경사항이 자꾸 생겨 바로 닫기가 안 된다. 다른 노트북은 괜찮다."
+- **원인**: VS Code Jupyter 확장이 .venv 커널을 고르며 `metadata.kernelspec.display_name = "sh-llm-study (3.12.3)"` 과
+  `metadata.language_info` 를 써 넣는데, nbformat 으로 생성한 노트북에는 이 값이 없어 열 때마다 변경이 생김. (사용자가 Ctrl+S 한 파일을
+  HEAD 와 비교해 확인.) 03 만 문제였던 것은 에이전트가 같은 시간대에 03 을 여러 번 덮어써 dirty 버퍼가 남았기 때문으로 추정.
+- **수정**: `scripts/normalize_notebooks.py` — 표준 메타데이터·순번 셀 id·출력 제거를 제자리 적용, `--check` 를 `scripts/verify.sh` 에 추가
+  (어긋나면 검증 실패). 노트북 4개 정규화. 노트북 빌더는 이후 이 스크립트를 마지막에 호출한다.
+- **규칙**: 사용자가 열어 둘 수 있는 노트북을 덮어쓰기 전에 한 줄 알린다 (에이전트 메모리에도 기록).
+
 ## 2026-09-16 — M2 3장 임베딩
 
 - **요청**: "Untitled.ipynb 삭제해도 되고, 다음 스텝으로" → 삭제 + `.gitignore` 에 `Untitled*.ipynb`.

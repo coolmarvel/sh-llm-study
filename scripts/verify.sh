@@ -7,6 +7,7 @@ cd "$(dirname "$0")/.."
 echo "== ruff format --check"; uv run ruff format --check src tests scripts
 echo "== ruff check";          uv run ruff check src tests scripts
 echo "== pytest";              uv run pytest
+echo "== notebooks (normalized)"; uv run python scripts/normalize_notebooks.py --check
 echo "== notebooks (execute)"
 mkdir -p build/notebooks
 for nb in notebooks/*.ipynb; do

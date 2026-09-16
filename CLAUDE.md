@@ -92,6 +92,7 @@ bash scripts/verify.sh                         # 검증 전체 (커밋 전 필�
 ```
 
 노트북은 `nbstripout` git 필터가 출력을 제거하고 커밋한다 (`uv run nbstripout --install` 이 clone 마다 필요).
+노트북을 새로 만들거나 재생성한 뒤에는 `uv run python scripts/normalize_notebooks.py` — VS Code 커널 메타데이터를 미리 넣어 열자마자 dirty 가 되지 않게 한다 (verify.sh 가 `--check`).
 
 ## 코드 지도 (수정 시 어디를 보나)
 
@@ -104,7 +105,7 @@ bash scripts/verify.sh                         # 검증 전체 (커밋 전 필�
 | `notebooks/NN-*.ipynb` | 장별 실습. 검증된 코드는 반드시 `src/shllm/` 로 옮기고 노트북은 import 해서 쓴다 |
 | `docs/book/NN-*.md` | 장별 교재. 노트북과 번호·제목이 1:1 |
 | `tests/test_*.py` | 모듈별 단위 테스트 (round-trip, shape, 작은 학습이 손실을 줄이는지) |
-| `scripts/` | `download_corpus.py`(코퍼스) · `verify.sh`(검증) · `build_book.py`(교재 PDF) · `hooks/`(하네스) · 이후 `train.py` |
+| `scripts/` | `download_corpus.py`(코퍼스) · `verify.sh`(검증) · `build_book.py`(교재 PDF) · `normalize_notebooks.py`(노트북 메타데이터 표준화 — 새 노트북 저장 후 실행) · `hooks/`(하네스) · 이후 `train.py` |
 | `configs/` | 학습 설정 YAML (7장 이후) |
 | `data/` → `/mnt/d/sh-llm-data` | corpus/ tokenizers/ checkpoints/ runs/ — git 에 안 들어감 |
 
