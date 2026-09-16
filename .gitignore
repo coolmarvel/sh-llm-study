@@ -42,3 +42,15 @@ build/
 
 # Jupyter 가 만드는 빈 노트북
 Untitled*.ipynb
+
+# --- 대시보드 웹 빌드 ---
+dashboard/web/dist/
+
+# --- oh-my-design 번들 (npx oh-my-design-cli@latest install-skills --agent claude-code --all 로 재설치) ---
+.claude/data/
+.claude/skills/omd-*/
+.claude/skills/claude-design/
+.omd/
+
+# --- Playwright MCP 산출물 ---
+.playwright-mcp/

@@ -1,6 +1,6 @@
 [project]
 name = "sh-llm-study"
-version = "0.1.3"
+version = "0.1.4"
 description = "LLM 개념 학습 + 밑바닥부터 소형 한글 GPT 구현 (CPU 전용)"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -16,6 +16,15 @@ dependencies = [
 ]
 
 [dependency-groups]
+dashboard = [
+    "fastapi>=0.141.1",
+    "httpx>=0.28.1",
+    "markdown>=3.10.3",
+    "nbconvert>=7.17.1",
+    "nbformat>=5.11.1",
+    "pygments>=2.21.0",
+    "uvicorn[standard]>=0.53.0",
+]
 dev = [
     "pytest>=8.3",
     "ruff>=0.6",
@@ -38,6 +47,7 @@ packages = ["src/shllm"]
 
 [tool.uv]
 package = true
+default-groups = ["dev", "dashboard"]   # verify.sh 가 대시보드 API 테스트도 돌린다
 
 [tool.uv.sources]
 torch = [{ index = "pytorch-cpu" }]
@@ -59,3 +69,4 @@ ignore = ["E501"]  # 한글 문장은 폭 계산이 달라 줄 길이 검사에�
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"
+pythonpath = ["."]   # dashboard.api 를 import 하기 위해

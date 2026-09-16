@@ -1,8 +1,6 @@
 {
-  "_remoteControl": "Remote Control(로컬 세션을 claude.ai/code 에 동기화) 차단 — 대화 내용이 웹에 남지 않게. 2026-09-05 결정",
-  "disableRemoteControl": true,
-  "remoteControlAtStartup": false,
-  "autoUploadSessions": false,
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "_doc": "OmD project hooks — auto-installed by `omd install-skills`. Re-run with --force to refresh.",
   "hooks": {
     "PreToolUse": [
       {
@@ -38,7 +36,57 @@
             "timeout": 30000
           }
         ]
+      },
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ${CLAUDE_PROJECT_DIR}/.claude/hooks/post-edit-watch.cjs",
+            "timeout": 2000
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ${CLAUDE_PROJECT_DIR}/.claude/hooks/skill-activation.cjs",
+            "timeout": 3000
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ${CLAUDE_PROJECT_DIR}/.claude/hooks/session-state-loader.cjs",
+            "timeout": 3000
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node ${CLAUDE_PROJECT_DIR}/.claude/hooks/session-end-foldin.cjs",
+            "timeout": 5000
+          }
+        ]
       }
     ]
-  }
+  },
+  "_remoteControl": "Remote Control(로컬 세션을 claude.ai/code 에 동기화) 차단 — 대화 내용이 웹에 남지 않게. 2026-09-05 결정",
+  "disableRemoteControl": true,
+  "remoteControlAtStartup": false,
+  "autoUploadSessions": false
 }

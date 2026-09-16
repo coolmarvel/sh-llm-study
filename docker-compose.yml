@@ -1,0 +1,29 @@
+# docker compose up --build -d
+#   http://localhost:8082  대시보드 (손실 곡선·어텐션·생성 + 교재·노트북 결과 보기)
+#   http://localhost:8888  JupyterLab (노트북을 브라우저에서 실행) — 로컬 전용이라 토큰 없음
+# 데이터(코퍼스·토크나이저·체크포인트·로그)는 D 드라이브 /mnt/d/sh-llm-data (ADR-0002)
+services:
+  dashboard:
+    build: { context: ., dockerfile: dashboard/Dockerfile, target: dashboard }
+    ports: ["8082:8082"]
+    volumes:
+      - /mnt/d/sh-llm-data:/data:ro
+      - ./docs:/app/docs:ro          # 교재 탭
+      - ./notebooks:/app/notebooks:ro
+      - ./build/notebooks:/app/build/notebooks:ro   # verify.sh 가 실행한 노트북(출력 포함) → 노트북 탭
+    environment: { SHLLM_DATA_DIR: /data, SHLLM_THREADS: "4" }
+    restart: unless-stopped
+
+  lab:
+    build: { context: ., dockerfile: dashboard/Dockerfile, target: lab }
+    ports: ["8888:8888"]
+    volumes:
+      - /mnt/d/sh-llm-data:/data          # 노트북 02·07 이 토크나이저·체크포인트를 쓴다
+      - ./src:/app/src:ro
+      - ./notebooks:/app/notebooks
+      - ./docs:/app/docs
+      - ./configs:/app/configs:ro
+      - ./scripts:/app/scripts:ro
+      - ./build:/app/build
+    environment: { SHLLM_DATA_DIR: /data, SHLLM_THREADS: "6" }
+    restart: unless-stopped

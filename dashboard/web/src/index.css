@@ -1,0 +1,99 @@
+@import "tailwindcss";
+
+/* DESIGN.md 토큰 — 여기서만 값을 정한다. 컴포넌트는 var() 또는 아래 유틸만 쓴다 */
+:root {
+  --canvas: #0b0c0e;
+  --surface: #131417;
+  --surface-raised: #1a1b1f;
+  --hairline: #222327;
+  --fg: #f4f5f7;
+  --secondary: #c3c8d1;
+  --muted: #858a94;
+  --quiet: #5d6169;
+  --accent: #6c74dc;
+  --on-accent: #0b0c0e;
+  --series-train: #6c74dc;
+  --series-val: #e0a458;
+  --heat-low: #131417;
+  --heat-high: #9aa3ff;
+  --prob-bar: #3f4560;
+  --danger: #e5484d;
+  --font-ui: "Inter Variable", "Pretendard Variable", Pretendard, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "D2Coding", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+html, body, #root { height: 100%; }
+body {
+  margin: 0;
+  background: var(--canvas);
+  color: var(--fg);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+.mono { font-family: var(--font-mono); font-size: 12.5px; }
+.label { font-size: 12px; color: var(--muted); }
+.card { background: var(--surface); border: 1px solid var(--hairline); border-radius: 8px; padding: 16px; }
+.card-title { font-size: 15px; font-weight: 510; letter-spacing: -0.1px; margin: 0 0 12px; }
+.h1 { font-size: 20px; font-weight: 590; letter-spacing: -0.2px; line-height: 1.3; margin: 0; }
+.btn-primary { background: var(--fg); color: var(--canvas); border-radius: 9999px; height: 32px; padding: 0 14px; font-weight: 510; transition: opacity 120ms ease-out; }
+.btn-primary:hover { opacity: .92; }
+.btn-primary:disabled { opacity: .4; cursor: default; }
+.btn-ghost { background: transparent; color: var(--secondary); border: 1px solid var(--hairline); border-radius: 9999px; height: 32px; padding: 0 12px; transition: background 120ms ease-out; }
+.btn-ghost:hover { background: var(--surface-raised); }
+.field { background: var(--canvas); color: var(--fg); border: 1px solid var(--hairline); border-radius: 6px; height: 32px; padding: 0 10px; font-family: var(--font-mono); font-size: 12.5px; width: 100%; outline: none; transition: border-color 120ms ease-out; }
+.field:focus { border-color: var(--accent); }
+textarea.field { height: auto; padding: 8px 10px; line-height: 1.5; resize: vertical; }
+.nav-item { display: flex; align-items: center; height: 32px; padding: 0 12px; border-radius: 6px; color: var(--muted); border-left: 2px solid transparent; transition: background 120ms ease-out, color 120ms ease-out; }
+.nav-item:hover { background: var(--surface-raised); color: var(--secondary); }
+.nav-item.selected { background: var(--surface-raised); color: var(--fg); border-left-color: var(--accent); }
+.run-row { display: grid; grid-template-columns: minmax(120px, 1fr) 56px 48px 56px 48px; gap: 8px; align-items: center; height: 36px; padding: 0 12px; border-radius: 6px; cursor: pointer; transition: background 120ms ease-out; }
+.run-row:hover { background: var(--surface-raised); }
+.run-row.selected { background: var(--surface-raised); }
+.run-row.selected .dot { background: var(--accent); }
+.dot { width: 6px; height: 6px; border-radius: 9999px; background: var(--quiet); display: inline-block; margin-right: 8px; }
+.stat-value { font-family: var(--font-mono); font-size: 18px; font-weight: 510; }
+.chip { display: inline-block; background: var(--surface-raised); border-radius: 6px; padding: 2px 6px; margin: 2px; font-family: var(--font-mono); font-size: 12.5px; cursor: pointer; border: 1px solid transparent; transition: border-color 120ms ease-out; }
+.chip:hover, .chip.selected { border-color: var(--accent); }
+.chip.prompt { color: var(--muted); cursor: default; }
+.chip.prompt:hover { border-color: transparent; }
+input[type=range] { accent-color: var(--accent); width: 100%; }
+select.field { appearance: auto; }
+
+/* 좁은 화면 (< 900px): 사이드바를 상단 바로, 2열 그리드를 1열로 */
+@media (max-width: 900px) {
+  .app { flex-direction: column; }
+  .sidebar { width: 100% !important; border-right: none !important; border-bottom: 1px solid var(--hairline); flex-direction: row !important; align-items: center; gap: 4px; padding: 8px 12px !important; overflow-x: auto; }
+  .sidebar .brand { margin: 0 8px 0 0 !important; }
+  .sidebar .nav-item .label { display: none; }
+  .sidebar .footer { display: none; }
+  .two-col { grid-template-columns: 1fr !important; }
+  .content { padding: 12px 16px !important; }
+  .stats { grid-template-columns: 1fr 1fr !important; }
+  .run-row { grid-template-columns: minmax(90px, 1fr) 48px 44px 52px 44px; padding: 0 6px; gap: 4px; }
+  .card { padding: 12px; }
+}
+
+/* 교재 본문 (markdown → HTML) */
+.prose-dark { color: var(--secondary); font-size: 14px; line-height: 1.75; max-width: 860px; }
+.prose-dark h1 { font-size: 22px; font-weight: 590; color: var(--fg); margin: 0 0 16px; letter-spacing: -0.2px; }
+.prose-dark h2 { font-size: 17px; font-weight: 590; color: var(--fg); margin: 28px 0 10px; padding-bottom: 6px; border-bottom: 1px solid var(--hairline); }
+.prose-dark h3 { font-size: 14.5px; font-weight: 510; color: var(--fg); margin: 20px 0 8px; }
+.prose-dark p { margin: 0 0 12px; }
+.prose-dark strong { color: var(--fg); font-weight: 590; }
+.prose-dark code { font-family: var(--font-mono); font-size: 12.5px; background: var(--surface-raised); padding: 1px 5px; border-radius: 4px; color: var(--fg); }
+.prose-dark pre { background: #0e0f12; border: 1px solid var(--hairline); border-radius: 6px; padding: 12px 14px; overflow-x: auto; margin: 10px 0 16px; }
+.prose-dark pre code { background: none; padding: 0; font-size: 12.5px; line-height: 1.55; }
+.prose-dark table { border-collapse: collapse; margin: 10px 0 16px; font-size: 13px; }
+.prose-dark th, .prose-dark td { border: 1px solid var(--hairline); padding: 5px 10px; vertical-align: top; }
+.prose-dark th { background: var(--surface-raised); color: var(--fg); font-weight: 510; }
+.prose-dark ul, .prose-dark ol { padding-left: 22px; margin: 0 0 12px; }
+.prose-dark li { margin-bottom: 4px; }
+.prose-dark blockquote { border-left: 3px solid var(--quiet); margin: 0 0 12px; padding: 2px 12px; color: var(--muted); }
+.prose-dark a { color: var(--accent); }
+.prose-dark hr { border: 0; border-top: 1px solid var(--hairline); margin: 20px 0; }
+/* 그리드 자식이 내용(코드 블록·표) 폭 때문에 넓어지지 않게 */
+.two-col > * { min-width: 0; }
+.prose-dark table { display: block; overflow-x: auto; max-width: 100%; }
+.prose-dark img { max-width: 100%; }
