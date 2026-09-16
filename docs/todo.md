@@ -12,13 +12,15 @@ domain: development
 
 ## P1 — 다음 릴리스에서 다뤄야 함
 
-- [ ] **M1 2장** BPE 토크나이저 — `src/shllm/tokenizer.py` 에 `BPETokenizer`, `data/tokenizers/` 저장 규약 (`docs/plans/0001-mvp.md`)
+- [ ] **M2 3장** 임베딩 — `src/shllm/embedding.py`, `bpe-8192.json` 을 읽어 토큰·위치 임베딩 (`docs/plans/0001-mvp.md`)
 
 ## P2 — 가까운 로드맵
 
 - [ ] M2~M5 장들 (`docs/plans/0001-mvp.md`)
 - [ ] M6 착수 시: `npx oh-my-design-cli@latest` 설치 + `/omd:init Linear` → `DESIGN.md` (CLAUDE.md 디자인 절)
 - [ ] 코퍼스 2차 확장(한국어 위키 일부) 여부 — 7장 학습 결과 보고 결정
+- [ ] 프로젝트 어휘 크기 확정 — 지금은 `bpe-8192.json`(2.10자/토큰). 9장에서 4096/8192 손실 비교 후 결정. 토크나이저 바꾸면 체크포인트 호환 깨짐
+- [ ] 10장 스코프: 사용자 최종 기대는 "대화" — 미니 SFT(대화 형식 파인튜닝) 데모를 넣을지 사용자와 결정 (2026-09-16 질문)
 
 ## P3 — 품질
 

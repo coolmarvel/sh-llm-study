@@ -12,6 +12,19 @@ domain: development
 
 블록 형식: `## YYYY-MM-DD — 제목` 아래에 **요청/피드백 → 수정 → 검증 → 다음** 순서로 간결하게.
 
+## 2026-09-16 — M1 2장 BPE 토크나이저 + 교재 PDF 빌드 + 공개 저장소
+
+- **요청**: "다음 스텝 진행, build_book.py 만들어 바탕화면에 복사·갱신 시 이전 PDF 교체, GitHub public 생성·푸시" + 질문 "만들면 대화가 되나?" (→ 채팅으로 답: base 모델은 이어쓰기만, 대화는 SFT 필요. todo P2 에 10장 스코프 항목).
+- **만든 것**: `scripts/build_book.py`(weasyprint, `build/book/sh-llm-study-book-v<버전>.pdf` → 바탕화면 이전 판 삭제 후 복사),
+  CLAUDE.md 규칙(교재 변경 시 같은 턴 재빌드, 체크리스트 ⑦), GitHub `coolmarvel/sh-llm-study`(public) 생성·푸시.
+  `BPETokenizer`(`src/shllm/tokenizer.py`: 바이트 BPE + 증분 학습 + `char_first` 글자 조립 + `truncated`), 테스트 7개,
+  `docs/book/02-bpe-tokenizer.md`, `notebooks/02-bpe-tokenizer.ipynb`(실행 ~3분), `data/tokenizers/bpe-8192.json`. 버전 0.1.2.
+- **설계 결정(사고 기록)**: 순수 바이트 BPE 는 한글에서 글자 경계를 걸치는 조각이 어휘의 1/6 을 차지("옛" 이 두 조각) →
+  `char_first=True` 로 2회 이상 나온 글자를 먼저 조립(2,520 병합). 압축률은 같으나(8192 에서 2.10자/토큰) 토큰이 온전한 글자 단위.
+  단순 병합(매번 전체 재계산)은 8천 병합에 25분 → `pair_counts`+`pair_words` 증분 갱신으로 ~1.5분.
+- **검증**: `bash scripts/verify.sh` 통과, PDF 재빌드·바탕화면 교체, 커밋·푸시.
+- **다음**: M2 3장 임베딩.
+
 ## 2026-09-16 — M1 1장: 문자 토크나이저 + 바이그램/n-gram
 
 - **요청**: "진행해줘" (1장 착수). Docker Desktop 실행 확인 요청 → `docker` 29.7 동작 확인, todo P2/plan 항목 해소.
