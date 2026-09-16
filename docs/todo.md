@@ -12,7 +12,8 @@ domain: development
 
 ## P1 — 다음 릴리스에서 다뤄야 함
 
-- [ ] **M2 3장** 임베딩 — `src/shllm/embedding.py`, `bpe-8192.json` 을 읽어 토큰·위치 임베딩 (`docs/plans/0001-mvp.md`)
+- [ ] **M2 4장** 신경망 기초 — autograd·경사하강 NumPy 재현 → PyTorch MLP 언어모델 (Bengio 2003), `src/shllm/mlp.py`(가칭) (`docs/plans/0001-mvp.md`)
+- [ ] 7장 학습 후 3장 노트북의 PCA 그림을 학습된 토큰 임베딩으로 다시 그리기 (`notebooks/03-embedding.ipynb` §2 참조)
 
 ## P2 — 가까운 로드맵
 
@@ -26,7 +27,6 @@ domain: development
 
 - [ ] `scripts/download_corpus.py` 의 `drop_boilerplate` 는 위키문헌 페이지 구조에 의존 — 페이지가 바뀌면 깨질 수 있음. 합본에 남은 잡음 문구 4건 확인
 
-- [ ] 루트 `Untitled.ipynb` (빈 노트북) 처리 — 삭제 또는 `.gitignore` 에 `Untitled*.ipynb`. 사용자 확인 후
 - [ ] `NGramModel.loss` 는 파이썬 루프(1.1M 토큰 × n 회 dict 조회, n=5 에 ~6초) — 9장 평가에서 재사용하면 벡터화 검토
 
 ## P4 — 아이디어

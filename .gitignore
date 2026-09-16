@@ -39,3 +39,6 @@ dist/
 
 # --- 교재 빌드 산출물 ---
 build/
+
+# Jupyter 가 만드는 빈 노트북
+Untitled*.ipynb

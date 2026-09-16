@@ -12,6 +12,18 @@ domain: development
 
 블록 형식: `## YYYY-MM-DD — 제목` 아래에 **요청/피드백 → 수정 → 검증 → 다음** 순서로 간결하게.
 
+## 2026-09-16 — M2 3장 임베딩
+
+- **요청**: "Untitled.ipynb 삭제해도 되고, 다음 스텝으로" → 삭제 + `.gitignore` 에 `Untitled*.ipynb`.
+- **만든 것**: `src/shllm/embedding.py`(`TokenEmbedding`·`one_hot_lookup`·`sinusoidal_positions`·`LearnedPositionalEmbedding`·
+  `GPTEmbedding`, 학습 없이 벡터를 만드는 `cooccurrence_matrix`·`ppmi`·`svd_embeddings`·`nearest`), `tests/test_embedding.py`(7개),
+  `docs/book/03-embedding.md`, `notebooks/03-embedding.ipynb`(실행 ~30초). 버전 0.1.3.
+- **설계 결정**: 3장은 4장(autograd) 앞이라 "학습된 벡터"를 만들 수 없음 → 동시출현(±2칸, 상위 4,000 토큰)+PPMI+SVD 로 세어서
+  만든 벡터로 이웃(` 아버지`→` 어머니`, ` 돈`→` 원`·` 이천`, ` 없다`→` 없었다`)을 보여 "1장 확률표의 압축 = 임베딩" 감각을 만든다.
+  학습된 임베딩 시각화는 7장 뒤로 (todo).
+- **검증**: `bash scripts/verify.sh` 통과, PDF 재빌드(v0.1.3), 커밋·푸시.
+- **다음**: M2 4장 신경망 기초.
+
 ## 2026-09-16 — M1 2장 BPE 토크나이저 + 교재 PDF 빌드 + 공개 저장소
 
 - **요청**: "다음 스텝 진행, build_book.py 만들어 바탕화면에 복사·갱신 시 이전 PDF 교체, GitHub public 생성·푸시" + 질문 "만들면 대화가 되나?" (→ 채팅으로 답: base 모델은 이어쓰기만, 대화는 SFT 필요. todo P2 에 10장 스코프 항목).
