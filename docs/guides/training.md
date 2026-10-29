@@ -9,7 +9,7 @@ domain: model
 
 ## 개요
 
-`src/shllm/` 패키지로 토크나이저 → 모델 → 학습 → 생성 → 평가가 한 벌로 돈다. 장별 설명은 `docs/book/`, 여기는 **현재 구현된 동작과 파일 규약**만.
+`src/shllm/` 패키지로 토크나이저 -> 모델 -> 학습 -> 생성 -> 평가가 한 벌로 돈다. 장별 설명은 `docs/book/`, 여기는 **현재 구현된 동작과 파일 규약**만.
 
 ## 동작 방식
 
@@ -27,7 +27,7 @@ best.pt ─load_checkpoint─▶ generate(...) / evaluate_loss(...) / 대시보�
 | 학습 | `train.py` `Trainer` | warmup+cosine, AdamW(decay 는 행렬만), clip 1.0, JSONL 로그, best/ckpt |
 | 긴 학습 | `scripts/train.py --config configs/*.yaml` | 기본 `--threads` = 물리 코어. `--resume`. 설정의 `corpus`·`tokenizer` 로 데이터를 고른다 |
 | 코퍼스 | `scripts/download_corpus.py`(근대문학 20편) · `scripts/download_wiki.py`(위키 알찬·좋은 글 + 링크 이웃, 약 1,000만 자) | `korean-classics.txt` · `korean-wiki.txt` · `korean-mixed.txt` |
-| 생성 | `generate.py` | 반복 억제 → temperature → top-k → top-p |
+| 생성 | `generate.py` | 반복 억제 -> temperature -> top-k -> top-p |
 | 평가 | `eval.py` | `evaluate_loss`(시드 고정) · `bits_per_char` · `scaling_experiment` |
 | SFT 시연 | `sft.py` | 답 부분만 loss, `WORKS` 로 질문-답 |
 
@@ -60,7 +60,7 @@ checkpoints/<run>/best.pt   같은 형식, val 최저 시점
 ## 함정 (근거 1줄)
 
 - `torch.set_num_threads(16)` 은 8 보다 16배 느리다. `setup_cpu()` 기본은 물리 코어 (`config.PHYSICAL_CORES`, 2026-09-16 측정).
-- 코퍼스 49만 토큰 → 6.8M 모델은 약 2,100 스텝부터 val 정체 (best 5.485). `best.pt` 를 쓴다. 데이터 확장(ADR-0003)이 근본 해법.
+- 코퍼스 49만 토큰 -> 6.8M 모델은 약 2,100 스텝부터 val 정체 (best 5.485). `best.pt` 를 쓴다. 데이터 확장(ADR-0003)이 근본 해법.
 - 검증 loss 를 전체 val 로 한 번에 계산하면 (N, V) softmax 가 GB 단위, 배치 평균(`evaluate_loss`)으로.
 
 ## 관련 코드

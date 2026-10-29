@@ -6,22 +6,25 @@
 > [project-seed](https://github.com/coolmarvel/project-seed) 에서 2026-09-16 에 생성됨.
 > `<!-- TODO(kickoff) -->` 가 남아 있으면 킥오프가 끝나지 않은 것이다. 채우기 전에 기능 작업을 시작하지 않는다.
 
-## 🟢 세션 시작 부팅 프로토콜 (매 세션 첫 작업 전에 반드시 수행)
+## 세션 시작 부팅 프로토콜 (매 세션 첫 작업 전에 반드시 수행)
 
 새 세션에서 작업을 시작하면, **코드를 건드리기 전에** 순서대로:
 
-1. `docs/session-log.md` 읽기, 마지막으로 무엇을 했고 지금 어디쯤인지 (**진행 이력 SSOT**)
+1. `docs/current-state.md` 와 `docs/session-log.md` 최신 1~2개 블록 읽기: 현재 인수인계와 최근 이력. 과거 전체 로그는 필요할 때 검색
 2. `docs/todo.md` 읽기, 남은 일 (P1~P4)
-3. 최근 `docs/plans/*.md` 1개 읽기, 진행 중 기능의 설계 의도
+3. 작업 관련 `docs/plans/*.md` 와 `docs/domain-contract.md` 의 관련 규칙 읽기. 날짜상 최신 계획이 지금 작업과 같다고 가정하지 않는다
 4. 사용자 피드백 확인: 루트 `feedback/` 폴더의 스크린샷·메모 = 미처리 피드백. 반영 후 `docs/feedback-archive/YYYY-MM-DD-*/` 로 이동. 채팅으로 온 피드백은 session-log 블록에 요약.
 5. `git status` 에 모르는 변경이 있으면 session-log 와 대조, 다른 세션의 흔적일 수 있다. 출처 불명이면 사용자에게 확인.
 
-## 🔴 변경 후 자동 규칙 (사용자가 매번 요청하지 않아도 수행)
+## 변경 후 자동 규칙 (사용자가 매번 요청하지 않아도 수행)
 
-1. 코드를 바꾸면 **같은 턴에** `docs/session-log.md`(최상단 블록 추가)·`docs/todo.md`
+1. 코드를 바꾸면 **같은 작업 단위에** `docs/current-state.md`(덮어쓰기)·`docs/session-log.md`(최상단 블록 추가)·`docs/todo.md`
    (+릴리스급이면 `docs/changelog.md`)를 갱신한다. 문서 규칙은 `docs/writing-guide.md`.
-2. 검증을 통과하기 전에는 커밋 메시지 작성/산출물 전달을 하지 않는다:
-   `bash scripts/verify.sh` (ruff format --check · ruff check · pytest · `notebooks/*.ipynb` 전체 실행)
+   팀 작업이면 worker 는 증거만 돌려주고 리드만 통합 문서와 버전을 고친다 (`docs/agent-workflow.md`).
+2. 검증을 통과하기 전에는 커밋 메시지 작성/산출물 전달을 하지 않는다. 변경 종류별 최소 검증은 `docs/agent-workflow.md` "검증 계층":
+   `bash scripts/verify.sh` (전체: ruff format --check · ruff check · pytest · 노트북 정규화 · `notebooks/*.ipynb` 실행, 약 30분),
+   `bash scripts/verify.sh --fast` (노트북 실행 제외. `src/shllm/`·`notebooks/`·`docs/book/` 를 안 건드린 변경에만).
+   실행하지 않은 검사를 통과했다고 보고하지 않는다.
 3. 버전을 판단해 올린다 (아래 "버전 정책").
 4. 산출물 전달: 챕터 = 교재(`docs/book/`)+노트북+`src/shllm/` 모듈이 verify 통과한 상태.
    **`docs/book/` 이 바뀌면 같은 턴에 `uv run python scripts/build_book.py`**, 바탕화면(`/mnt/c/Users/user/Desktop/`)의
@@ -50,7 +53,7 @@ type: `feat` `fix` `refactor` `chore` `docs` `style` `test` `perf` `ci` `build` 
 - **진행 이력의 SSOT 는 `docs/session-log.md`**, git history 가 아니다 (커밋이 성긴 단위라서).
 - 세션이 끊겨도 이어서 작업할 수 있게 **모든 진행 사항을 `docs/` 에 파일로 기록**한다.
 - 설계 논쟁이 생기면 `docs/brief.md`(왜/무엇 SSOT)로 돌아와 판정한다. 브리프 밖 기능은 스코프 확인 먼저.
-- `.env` 는 직접 수정하지 않는다. `.env.example` 수정 또는 사용자에게 요청 (훅이 차단함).
+- `.env` 는 직접 수정하지 않는다. `.env.example` 수정 또는 사용자에게 요청 (Claude Code 에서는 훅이 차단, `tests/test_hooks.py` 로 확인. 다른 도구에는 적용 안 됨).
 - 규칙이 미확정이면 이 파일에 `<!-- TODO -->` 로 남기고, 확정되는 순간 채운다.
 
 ## 이 프로젝트가 뭔가
@@ -70,6 +73,9 @@ LLM 을 처음 배우는 자바 배경 개발자(제작자 본인)가, **개념�
 |---|---|
 | `docs/writing-guide.md` | **문서 지배 규칙** (SSOT·frontmatter·코드 1:1 대조). 문서 쓰기 전 필독 |
 | `docs/brief.md` | 프로젝트 **왜/무엇 SSOT**, 킥오프 산출물 |
+| `docs/current-state.md` | 짧은 현재 인수인계 (40줄 안쪽). 전체 로그 대신 먼저 읽는다 |
+| `docs/agent-workflow.md` | 운영 모드·검증 계층·보호 장치 실제 적용 상태·팀 위임 규칙 |
+| `docs/domain-contract.md` | 판정 규칙(DOMAIN-*)·수용 예시(CASE-*)와 연결된 테스트·unknown |
 | `docs/session-log.md` | 세션별 진행 이력. **"언제 무슨 일" SSOT** (최신이 위) |
 | `docs/todo.md` | 미해결·향후 작업만 (P1~P4). 완료분은 session-log 로 |
 | `docs/changelog.md` | 릴리스 단위 사람용 요약 |
@@ -83,16 +89,17 @@ LLM 을 처음 배우는 자바 배경 개발자(제작자 본인)가, **개념�
 
 ```bash
 uv sync                                        # 환경 복원 (uv 는 ~/.local/bin/uv)
-uv run python scripts/download_corpus.py       # 코퍼스 → data/corpus/ (이미 있으면 skip, --force 로 재수집)
-uv run python scripts/download_wiki.py         # 2차 확장: 위키 알찬·좋은 글 + 이웃 → korean-wiki.txt · korean-mixed.txt (ADR-0003)
+uv run python scripts/download_corpus.py       # 코퍼스 -> data/corpus/ (이미 있으면 skip, --force 로 재수집)
+uv run python scripts/download_wiki.py         # 2차 확장: 위키 알찬·좋은 글 + 이웃 -> korean-wiki.txt · korean-mixed.txt (ADR-0003)
 uv run python scripts/train_tokenizer.py --corpus korean-mixed --out bpe-8192-mixed.json
 uv run jupyter lab                             # 노트북 실습
 uv run pytest                                  # 단위 테스트
 uv run ruff format . && uv run ruff check .    # 포맷·린트 (Write/Edit 훅이 .py 는 자동 포맷)
-bash scripts/verify.sh                         # 검증 전체 (커밋 전 필수)
+bash scripts/verify.sh                         # 검증 전체 (src·노트북·교재 변경 시 커밋 전 필수, 약 30분)
+bash scripts/verify.sh --fast                  # 노트북 실행 제외 (운영 문서·훅·대시보드 변경)
 # 긴 학습(7장):      nohup uv run python -u scripts/train.py --config configs/small-cpu.yaml > data/runs/small-cpu.out 2>&1 &   (--resume 로 이어서)
 # 교재 PDF:         uv run python scripts/build_book.py   # build/book/ + 바탕화면 교체 (--no-copy 로 굽기만)
-# 대시보드(M6):     docker compose up --build -d  → 8082 (실험·어텐션·생성·교재·노트북 실행기: 별도 Jupyter 서버 없음)
+# 대시보드(M6):     docker compose up --build -d  -> 8082 (실험·어텐션·생성·교재·노트북 실행기: 별도 Jupyter 서버 없음)
 #                   개발: uv run uvicorn dashboard.api.main:app --port 8082 + cd dashboard/web && npm run dev
 ```
 
@@ -103,7 +110,7 @@ bash scripts/verify.sh                         # 검증 전체 (커밋 전 필�
 
 | 위치 | 역할 |
 |---|---|
-| `src/shllm/config.py` | 경로 SSOT(`DATA_DIR`·`CORPUS_DIR`·`CHECKPOINT_DIR`…) + `setup_cpu()`. 경로를 다른 곳에 하드코딩하지 않는다 |
+| `src/shllm/config.py` | 경로 SSOT(`DATA_DIR`·`CORPUS_DIR`·`CHECKPOINT_DIR`...) + `setup_cpu()`. 경로를 다른 곳에 하드코딩하지 않는다 |
 | `src/shllm/data.py` | 코퍼스 읽기 (`load_corpus`, `list_work_files`) |
 | `src/shllm/tokenizer.py` | 1장 `CharTokenizer` · 2장 `BPETokenizer` (프로젝트 토크나이저 `data/tokenizers/bpe-8192.json`) |
 | `src/shllm/{bigram,embedding,autograd,numpy_lm,mlp,attention,model,train,generate,eval,sft}.py` | 1·3·4·4·4·5·6·7·8·9·10장 모듈 (동작 요약: `docs/guides/training.md`) |
@@ -111,47 +118,51 @@ bash scripts/verify.sh                         # 검증 전체 (커밋 전 필�
 | `notebooks/NN-*.ipynb` | 장별 실습. 검증된 코드는 반드시 `src/shllm/` 로 옮기고 노트북은 import 해서 쓴다 |
 | `docs/book/NN-*.md` | 장별 교재. 노트북과 번호·제목이 1:1 |
 | `tests/test_*.py` | 모듈별 단위 테스트 (round-trip, shape, 작은 학습이 손실을 줄이는지) |
-| `scripts/` | `download_corpus.py`(코퍼스) · `verify.sh`(검증) · `build_book.py`(교재 PDF) · `normalize_notebooks.py`(노트북 메타데이터 표준화, 새 노트북 저장 후 실행) · `hooks/`(하네스) · 이후 `train.py` |
+| `scripts/` | `download_corpus.py`(코퍼스) · `verify.sh`(검증, `--fast`) · `build_book.py`(교재 PDF) · `normalize_notebooks.py`(노트북 메타데이터 표준화, 새 노트북 저장 후 실행) · `hooks/`(하네스) · 이후 `train.py` |
 | `configs/` | `tiny-notebook.yaml`(노트북 600스텝) · `small-cpu.yaml`(근대문학 본 학습, 45분) · `mixed-cpu.yaml`(위키 혼합, 약 2시간) |
-| `data/` → `/mnt/d/sh-llm-data` | corpus/ tokenizers/ checkpoints/ runs/, git 에 안 들어감 |
+| `data/` -> `/mnt/d/sh-llm-data` | corpus/ tokenizers/ checkpoints/ runs/, git 에 안 들어감 |
 
-**새 장 추가 = ① `docs/book/NN-제목.md` ② `notebooks/NN-제목.ipynb` ③ `src/shllm/모듈.py` ④ `tests/test_모듈.py`
-⑤ `docs/plans/0001-mvp.md` 체크 ⑥ `bash scripts/verify.sh` ⑦ `uv run python scripts/build_book.py`(PDF 교체)**, 일곱 개가 다 있어야 한 장이 끝난 것이다.
+**새 장 추가 = 1) `docs/book/NN-제목.md` 2) `notebooks/NN-제목.ipynb` 3) `src/shllm/모듈.py` 4) `tests/test_모듈.py`
+5) `docs/plans/0001-mvp.md` 체크 6) `bash scripts/verify.sh` 7) `uv run python scripts/build_book.py`(PDF 교체)**, 일곱 개가 다 있어야 한 장이 끝난 것이다.
 
 함정:
-- 코퍼스 합본(`korean-classics.txt`)과 `works/*.txt` 를 같이 읽으면 데이터가 2배로 중복된다 → `load_corpus("korean-classics")` 만 학습에 쓴다.
-- `/mnt/d` 는 느리다 → 학습 루프 안에서 D 드라이브를 반복 읽지 않는다. 코퍼스는 시작 시 한 번 메모리로.
-- 토크나이저가 다른 run 은 토큰당 loss 를 비교하면 안 된다 → 글자당 bit (9장 `bits_per_char`). 체크포인트가 자기 토크나이저 이름을 기록한다.
-- 백그라운드 대기 스크립트에서 `pgrep -f`/`pkill -f` 패턴이 자기 명령줄에 걸린다 → `lsof -ti:<port>` 나 파일 마커(`grep 완료`) 로 기다린다 (2026-09-16 사고 2회).
+- 코퍼스 합본(`korean-classics.txt`)과 `works/*.txt` 를 같이 읽으면 데이터가 2배로 중복된다 -> `load_corpus("korean-classics")` 만 학습에 쓴다.
+- `/mnt/d` 는 느리다 -> 학습 루프 안에서 D 드라이브를 반복 읽지 않는다. 코퍼스는 시작 시 한 번 메모리로.
+- 토크나이저가 다른 run 은 토큰당 loss 를 비교하면 안 된다 -> 글자당 bit (9장 `bits_per_char`). 체크포인트가 자기 토크나이저 이름을 기록한다.
+- Claude Code 훅 입력은 stdin JSON 의 `tool_input` 이다. 환경변수 `CLAUDE_TOOL_INPUT` 만 읽던 시드 훅 3개는 아무것도 막지 못했다 (2026-10-27 시드 감사, 2026-10-29 수정). 훅을 고치면 `tests/test_hooks.py` 에 차단/허용 사례를 추가한다.
+- 백그라운드 대기 스크립트에서 `pgrep -f`/`pkill -f` 패턴이 자기 명령줄에 걸린다 -> `lsof -ti:<port>` 나 파일 마커(`grep 완료`) 로 기다린다 (2026-09-16 사고 2회).
 
 ## 디자인 시스템 (oh-my-design)
 
 대시보드(M6, `dashboard/`)에만 적용. 챕터 노트북·교재에는 해당 없음.
+아래 `/omd:*` 명령은 번들이 설치되고 에이전트가 지원할 때의 연결부다. 지원하지 않는 도구는 `DESIGN.md` 의 같은 기준을 직접 검사하고 대체 검증과 미검증 항목을 기록한다.
 
 디자인 레퍼런스: **Linear** (베이스), 차용 없음. ADR-0002. oh-my-design 스킬 번들은 2026-09-16 설치됨, 스킬·카탈로그(24MB)는 git 제외,
 clone 마다 `npx oh-my-design-cli@latest install-skills --agent claude-code --all --lang ko` 로 재설치 (훅·에이전트·settings 는 커밋됨).
 `DESIGN.md` 는 레퍼런스 카탈로그(`.claude/data/references/linear.app`)에서 손으로 파생한 판, `/omd:init` 의 hash-bound 패키지로 바꾸려면 새 세션에서 실행 (todo P3).
-**주의**: `omd install-skills` 는 `.claude/settings.json` 을 덮어써 Remote Control 차단 키를 지운다 → 실행 후 반드시 복원 (2026-09-16 사고).
+**주의**: `omd install-skills` 는 `.claude/settings.json` 을 덮어써 Remote Control 차단 키를 지운다 -> 실행 후 반드시 복원 (2026-09-16 사고).
 디자인 계약은 루트 **`DESIGN.md`** (프로젝트 소유, 커밋 대상). 색·간격·컴포넌트 구조는 여기서만 정하고
 코드에 임의 값을 넣지 않는다. 설치 확인: `npx oh-my-design-cli@latest doctor`.
 
 | 상황 | 반드시 쓰는 명령 |
 |---|---|
-| 새 화면·기능 UI 만들기 | `/omd:harness` (조사→설계→구현→검증, 체크포인트 3개), 작은 컴포넌트 하나면 `/omd:apply` |
-| 기존 UI 손보기 | `/omd:apply` 로 `DESIGN.md` 기준 수정 → `/omd:slop-audit` |
+| 새 화면·기능 UI 만들기 | `/omd:harness` (조사, 설계, 구현, 검증 순, 체크포인트 3개), 작은 컴포넌트 하나면 `/omd:apply` |
+| 기존 UI 손보기 | `/omd:apply` 로 `DESIGN.md` 기준 수정 후 `/omd:slop-audit` |
 | UI 작업 마무리 전 | `/omd:slop-audit`(AI 티·일관성 감사) + `/omd:feel`(사용감 점검) 통과 후에만 산출물 전달 |
-| 디자인 원칙·토큰 바꾸기 | `/omd:init` 재실행 또는 `DESIGN.md` 직접 수정 → 변경 이유를 `docs/adr/` 에 기록 |
+| 디자인 원칙·토큰 바꾸기 | `/omd:init` 재실행 또는 `DESIGN.md` 직접 수정, 변경 이유를 `docs/adr/` 에 기록 |
 | 디자인 문서 열람 | `npx oh-my-design-cli@latest book` (localhost:6060) |
 | 번들 갱신 | `npx oh-my-design-cli@latest update` 후 `doctor` |
 
 ## 하네스 (Harness Engineering)
 
-지시문이 아니라 시스템으로 제약한다. 도입 근거: `docs/adr/0001-harness-engineering.md`.
+지시문을 실제 권한과 검사로 연결한다. 도입 근거: `docs/adr/0001-harness-engineering.md`, 실제 적용 상태는 `docs/agent-workflow.md`.
+훅·설정 파일이 있다는 것과 실제로 막는다는 것은 다르다. 강제 여부는 재현 테스트로 확인한다. Claude 훅은 Codex 등 다른 도구에 적용되지 않는다.
 
 | 축 | 내용 |
 |---|---|
-| Hooks (`scripts/hooks/`) | `env-guard.sh`(.env 편집 차단) · `git-add-guard.sh`(`git add -A/.`·.env staging 차단) · `format.sh`(PostToolUse, `.py` 를 ruff format + check --fix) |
-| Settings (`.claude/settings.json`) | `disableRemoteControl: true` + `remoteControlAtStartup: false` + `autoUploadSessions: false`. Claude Code **Remote Control**(로컬 세션을 claude.ai/code 에 동기화) 차단. 대화 내용이 웹에 남지 않게 한다. 세션 중 `/rc` 가 켜져 있으면 끊는다 |
+| Hooks (`scripts/hooks/`) | `env-guard.sh`(.env 편집 차단) · `git-add-guard.sh`(`git add -A/.`·.env staging 차단, 문자열 패턴이라 셸 우회는 못 막음) · `format.sh`(PostToolUse, `.py` 를 ruff format + check --fix). 입력은 `read-tool-input.py` 가 stdin JSON 에서 읽음. 회귀 검사 `tests/test_hooks.py` |
+| Settings (`.claude/settings.json`) | `disableRemoteControl: true` + `remoteControlAtStartup: false` + `autoUploadSessions: false`. Claude Code **Remote Control**(로컬 세션을 claude.ai/code 에 동기화) 차단. 세션 중 `/rc` 가 켜져 있으면 끊는다. 해당 기능 설정일 뿐 모든 외부 전송을 막는다는 보장은 아니다 |
+| 검증 계층 (`scripts/verify.sh`) | `--fast`(ruff·pytest·노트북 정규화) / 전체(+노트북 11개 실행). 어떤 변경에 무엇을 돌리나는 `docs/agent-workflow.md` |
 | Commands (`.claude/commands/`) | `/review-security` · `/deploy-check` |
 | MCP (`.mcp.json`) | `context7`(라이브러리 문서. PyTorch API 확인에 사용) · `playwright`(M6 대시보드 QA) |
 | Skills | oh-my-design 번들(M6 에서 설치) |

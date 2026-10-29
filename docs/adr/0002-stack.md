@@ -13,7 +13,7 @@ Accepted (킥오프 위저드에서 사용자가 직접 선택, 2026-09-16)
 ## 맥락
 
 `docs/brief.md`. CPU 만 있는 WSL PC 에서, LLM 개념을 챕터별로 배우며 소형 한글 GPT 를 밑바닥부터
-구현한다. 산출물은 ① 챕터별 노트북 + 패키지 코드 ② 마크다운 교재(→PDF) ③ 웹 대시보드 세 가지.
+구현한다. 산출물은 ① 챕터별 노트북 + 패키지 코드 ② 마크다운 교재(->PDF) ③ 웹 대시보드 세 가지.
 학습자는 자바 배경이며 Python·PyTorch 는 처음이다.
 
 ## 결정
@@ -23,10 +23,10 @@ Accepted (킥오프 위저드에서 사용자가 직접 선택, 2026-09-16)
 | 모델 언어·프레임워크 | **Python 3.12 + PyTorch (CPU 빌드)** | NumPy 순수 구현 / Java 순수 구현 |
 | 패키지 관리 | **uv** (`pyproject.toml` + `uv.lock`) | pip + venv |
 | 실습 형태 | **Jupyter 노트북(챕터별) + `src/shllm/` 패키지** | 스크립트만 |
-| 교재 | **`docs/book/` 마크다운 → PDF 한 권**(바탕화면 전달) |, |
+| 교재 | **`docs/book/` 마크다운 -> PDF 한 권**(바탕화면 전달) |, |
 | 대시보드 | **FastAPI + React(Vite·TypeScript) + Tailwind**, 도커로 8082 포트 | FastAPI+HTMX / Gradio |
-| 저장 | **파일만**, `data/` → `/mnt/d/sh-llm-data` 심볼릭 링크 (corpus·tokenizers·checkpoints·runs), 학습 로그 JSONL | 파일 + SQLite |
-| 코퍼스 | **한글 공개 텍스트** (퍼블릭 도메인 문학 → 한국어 위키 일부로 확장) | 영어 Tiny Shakespeare / 둘 다 |
+| 저장 | **파일만**, `data/` -> `/mnt/d/sh-llm-data` 심볼릭 링크 (corpus·tokenizers·checkpoints·runs), 학습 로그 JSONL | 파일 + SQLite |
+| 코퍼스 | **한글 공개 텍스트** (퍼블릭 도메인 문학 -> 한국어 위키 일부로 확장) | 영어 Tiny Shakespeare / 둘 다 |
 | 디자인 | **oh-my-design, 베이스 레퍼런스 Linear, 차용 없음** | Toss / AWS / Naver |
 | 하드웨어 | CPU 16코어, RAM 7.6GB, GPU 없음 |, |
 
@@ -54,6 +54,6 @@ Accepted (킥오프 위저드에서 사용자가 직접 선택, 2026-09-16)
 
 - (+) 레퍼런스가 풍부한 표준 스택. CPU 제약 안에서 학습·생성이 실제로 된다.
 - (+) 데이터가 D 드라이브에 있어 윈도우에서 바로 열어볼 수 있고, 코드 저장소는 5GB 이내로 가볍다.
-- (−) 학습 속도가 GPU 대비 수십 배 느리다 → 모델·코퍼스 크기를 챕터마다 명시적으로 제한한다.
-- (−) 노트북은 git diff 가 지저분하다 → `nbstripout` 으로 출력을 제거하고 커밋한다.
+- (−) 학습 속도가 GPU 대비 수십 배 느리다 -> 모델·코퍼스 크기를 챕터마다 명시적으로 제한한다.
+- (−) 노트북은 git diff 가 지저분하다 -> `nbstripout` 으로 출력을 제거하고 커밋한다.
 - (−) 도커는 현재 WSL 통합이 꺼져 있어 대시보드 마일스톤 전에 Docker Desktop 설정에서 켜야 한다.

@@ -20,9 +20,9 @@ v1.0 본 학습(`small-cpu`, 6.8M)은 근대문학 49만 토큰에서 2,100 스�
    대부분 수백 자 단편이라 제외. 각주·외부 링크·같이 보기 절 제거.
 2. **라이선스**: CC BY-SA 4.0. `data/corpus/WIKI-LICENSE.md` 에 출처·문서 목록 기록. 학습 모델·생성물은 학습용·비공개.
 3. **혼합**: `korean-mixed.txt` = 근대문학 합본 + 위키 합본. 근대문학만 쓰는 `korean-classics.txt` 는 그대로 남긴다 (1~9장 노트북은 계속 이것을 쓴다).
-4. **토크나이저 재학습**: 위키의 한자·숫자·라틴 문자는 기존 `bpe-8192.json` 에 없어 바이트로 쪼개진다 → 혼합 코퍼스로
+4. **토크나이저 재학습**: 위키의 한자·숫자·라틴 문자는 기존 `bpe-8192.json` 에 없어 바이트로 쪼개진다 -> 혼합 코퍼스로
    `bpe-8192-mixed.json` 을 새로 학습. 기존 체크포인트(`small-cpu`)는 기존 토크나이저로만 유효 (체크포인트가 토크나이저 이름을 기록).
-5. **새 run**: `configs/mixed-cpu.yaml` → `data/checkpoints/mixed-cpu/`. small-cpu 는 비교용으로 보존.
+5. **새 run**: `configs/mixed-cpu.yaml` -> `data/checkpoints/mixed-cpu/`. small-cpu 는 비교용으로 보존.
 
 ## 대안
 

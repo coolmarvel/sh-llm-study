@@ -1,7 +1,7 @@
 ---
 title: TODO
 created: 2026-09-16
-updated: 2026-09-16
+updated: 2026-10-29
 domain: development
 ---
 
@@ -16,11 +16,14 @@ domain: development
 
 ## P2: 가까운 로드맵
 
-- [ ] mixed-cpu 는 5,000 스텝에서도 val 이 내려가는 중 → `--resume` 으로 5,000 스텝 더, 또는 block 256·8층 모델 (스케일 업). 위키 20만 자 추가 수집 옵션
+- [ ] mixed-cpu 는 5,000 스텝에서도 val 이 내려가는 중, `--resume` 으로 5,000 스텝 더, 또는 block 256·8층 모델 (스케일 업). 위키 20만 자 추가 수집 옵션
 - [ ] 10장 SFT: 진짜 한국어 대화 데이터로 "형식" 학습 확장 (현재는 작품 목록 질문-답 80개 시연)
 
 ## P3: 품질
 
+- [ ] 교재(`docs/book/`)·노트북·코드 주석의 유니코드 화살표(약 280곳)·말줄임표 정리 여부: project-seed 특수기호 규칙(`docs/writing-guide.md` 언어 절). 교재 가독성에 영향이 있어 사용자 확인 후 진행, 바꾸면 전체 verify + PDF 재빌드
+- [ ] `.mcp.json` 버전 고정: context7 미고정, playwright `@latest` (2026-10-27 시드 감사 P2). 쓰는 버전 확인 후 고정
+- [ ] `.claude/hooks/*.cjs`(oh-my-design 번들 훅)의 입력 판독은 미검증. 번들 갱신 때 같이 확인
 - [ ] `DESIGN.md` 를 `/omd:init linear.app` 의 hash-bound 패키지로 교체 (새 세션에서 스킬 로드 필요). 실행 후 `.claude/settings.json` 의 Remote Control 키 복원 확인 (2026-09-16 사고: `omd install-skills` 가 지움)
 - [ ] `scripts/download_corpus.py` 의 `drop_boilerplate` 는 위키문헌 페이지 구조에 의존, 2026-09-16 재확인: 합본에 위키문헌/라이선스/[편집]/목차 잔재 0건. 페이지 구조가 바뀌면 재확인
 - [ ] 대시보드: 생성 스트리밍(현재는 완료 후 한 번에 응답, 60토큰 ≈ 3초), run 여러 개 겹쳐 그리기
