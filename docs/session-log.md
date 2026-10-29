@@ -31,6 +31,11 @@ domain: development
 - **검증**: `bash scripts/verify.sh --fast` 통과 (아래 current-state 의 수치). 노트북 전체 실행은 미실행: src 변경은 `__version__` 문자열뿐이라
   노트북 00 만 다시 실행해 `build/notebooks/` 갱신. 교재 변경 없음, PDF 재빌드 없음. 버전 0.1.6.
 - **다음**: v1.0 판정(todo P1). 교재·노트북 화살표 정리 여부는 사용자 확인.
+- **이어서 (사용자 지시: 다른 프로젝트도 반영·커밋·푸시)**: 같은 훅 수정을 11개 저장소에 커밋·푸시 (dicom-studio, remote-assist, sh-compositor, sh-design-system,
+  sh-dicom-studio, sh-econsent, sh-form-designer, sh-ip-scanner, sh-messenger, sh-video-editor, sh-web-editor). 저장소마다 `scripts/hooks/test-hooks.sh`(bash, 스택 중립) 와 session-log 블록.
+  포맷 훅도 고침: CLAUDE_TOOL_INPUT 판독(sh-compositor·sh-dicom-studio·sh-ip-scanner), jq 전용 판독(sh-web-editor, 이 PC 에 jq 없음), 공백 없는 JSON 만 받는 sed(remote-assist·sh-messenger).
+  murim-idle 은 다른 세션이 이미 고쳐 커밋해 둠(확인만). cm_groupware·jazz-community·voice_server·Compositor·craft-opensource 는 사용자 지시로 제외
+  (jazz·voice 는 git 저장소가 아니라 먼저 손댄 것을 원본으로 되돌림). project-seed 템플릿 훅은 사용자 지시로 그대로 둠 (새 프로젝트에 같은 결함이 들어감).
 
 ## 2026-09-16 (오후) v1.1: 코퍼스 확장·웹 내장 노트북 실행기·교재 보강·줄표 제거
 
